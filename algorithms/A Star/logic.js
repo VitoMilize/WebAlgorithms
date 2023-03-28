@@ -20,6 +20,7 @@ function getTable() {
   let b2 = 0;
 
   //while ((a1 == a2 && Math.abs(b2 - b1) <= 1) || (b1 == b2 && Math.abs(a2 - a1) <= 1)) {
+    
   while (a1 == a2 || b1 == b2) {
 
     let choose = Math.floor(Math.random() * 2);
