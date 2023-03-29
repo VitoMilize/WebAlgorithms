@@ -1,39 +1,4 @@
 
-export function drawRect(gl, program, ratio, pos, size, color)
-{
-  gl.useProgram(program);
-  
-  let positions = new Float32Array([
-    -size, size, //left up
-    size, size, //right up
-    -size, -size, //left down
-    size, -size, //rigth down
-  ]);
-
-  let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-  let buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(positionAttributeLocation);
-  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-
-  let modelMatrixLocation = gl.getUniformLocation(program, "uModelMatrix");
-  let colorUniformLocation = gl.getUniformLocation(program, "u_color");
-
-  let deltaX = 1-size*ratio, deltaY = 1-size;
-
-  let scaleMatrix = mat4.create();
-  let translationMatrix = mat4.create();
-  let modelMatrix = mat4.create();
-  mat4.fromTranslation(translationMatrix, [(pos[0]*ratio)-deltaX, pos[1]-deltaY, 0]);
-  mat4.fromScaling(scaleMatrix, [ratio,1,1]);
-  mat4.mul(modelMatrix, translationMatrix, scaleMatrix);
-
-  gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
-  gl.uniform4fv(colorUniformLocation, color);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); //4 vert
-}
-
 export function drawField(gl, program, field, sizeX, sizeY)
 {
     gl.useProgram(program);
@@ -112,7 +77,47 @@ export function initProgramField(gl, program, width, height)
     gl.uniform1f(heigthLoc, height);
 }
 
-export function initProgramRect(gl, program, width, height, tileSize)
+export function drawAnt(gl, program, ratio, size, ant)
+{
+  gl.useProgram(program);
+  
+  let s = size*2;
+  let positions = new Float32Array([
+    -0.5*s, 1.5*s, //left up
+    0.5*s, 1.5*s, //right up
+    -1*s, 0, //left down
+    1*s, 0, //rigth down
+    -0.5*s, -1.5*s,
+    0.5*s, -1.5*s,
+  ]);
+
+  let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+  let buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(positionAttributeLocation);
+  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+  let modelMatrixLocation = gl.getUniformLocation(program, "uModelMatrix");
+  let colorUniformLocation = gl.getUniformLocation(program, "u_color");
+
+  let deltaX = 1 + size*ratio , deltaY = 1;
+
+  let scaleMatrix = mat4.create();
+  let rotationMatrix = mat4.create();
+  let translationMatrix = mat4.create();
+  let modelMatrix = mat4.create();
+  mat4.fromScaling(scaleMatrix, [0.5,1,1]);
+  mat4.fromRotation(rotationMatrix, ant.dir - Math.PI/2, [0, 0, 1]);
+  mat4.fromTranslation(translationMatrix, [-deltaX + size*(ant.pos.x+1), -deltaY + (size/ratio)*(ant.pos.y+1), 0]);
+  mat4.mul(modelMatrix, scaleMatrix, rotationMatrix);
+  mat4.mul(modelMatrix, translationMatrix, modelMatrix);
+  gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
+  gl.uniform4fv(colorUniformLocation, ant.color);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, positions.length); 
+}
+
+export function initProgramAnt(gl, program, width, height)
 {
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
