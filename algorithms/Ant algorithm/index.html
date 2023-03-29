@@ -11,7 +11,14 @@
     <title>Ant Algorithm</title>
 </head>
 <body>
-    <canvas class="canvas" width="1000" height="1000"></canvas>
+    <div class="body">
+      <div class="menu">
+        <label for="fieldSizeInput">Размер поля:</label>
+        <input id="fieldSizeInput" type="number" value="10"/>
+        <button id="acceptButton" onclick="acceptSize()">Применить</button>
+      </div>
+      <canvas class="canvas" height="900px" width="1700px"></canvas>
+    </div>
     <script type="module" src="./WebGLFunctions.js"></script>
     <script type="module" src="./logic.js"></script>
 </body>

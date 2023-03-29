@@ -1,13 +1,13 @@
 
-export function drawRect(gl, program, pos, size, color)
+export function drawRect(gl, program, ratio, pos, size, color)
 {
   gl.useProgram(program);
   
   let positions = new Float32Array([
-    -1, -1+size, //left up
-    -1+size, -1+size, //right up
-    -1, -1, //left down
-    -1+size, -1, //rigth down
+    -size, size, //left up
+    size, size, //right up
+    -size, -size, //left down
+    size, -size, //rigth down
   ]);
 
   let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
@@ -19,14 +19,22 @@ export function drawRect(gl, program, pos, size, color)
 
   let modelMatrixLocation = gl.getUniformLocation(program, "uModelMatrix");
   let colorUniformLocation = gl.getUniformLocation(program, "u_color");
+
+  let deltaX = 1-size*ratio, deltaY = 1-size;
+
+  let scaleMatrix = mat4.create();
+  let translationMatrix = mat4.create();
   let modelMatrix = mat4.create();
-  mat4.fromTranslation(modelMatrix, [pos[0], pos[1], 0]);
+  mat4.fromTranslation(translationMatrix, [(pos[0]*ratio)-deltaX, pos[1]-deltaY, 0]);
+  mat4.fromScaling(scaleMatrix, [ratio,1,1]);
+  mat4.mul(modelMatrix, translationMatrix, scaleMatrix);
+
   gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
   gl.uniform4fv(colorUniformLocation, color);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); //4 vert
 }
 
-export function drawField(gl, program)
+export function drawField(gl, program, field, sizeX, sizeY)
 {
     gl.useProgram(program);
   
@@ -43,21 +51,9 @@ export function drawField(gl, program)
     gl.enableVertexAttribArray(positionAttributeLocation);
     gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-    let arr = new Array(100*100*3);
-
-    for (let i = 0; i < 100*100*3; i++) {
-        if (i % 3 == 0) {
-          arr[i] = Math.random()*255;
-        }
-        else
-        {
-          arr[i] = 0;
-        }
-    }
-
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 100, 100, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(arr));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, sizeX, sizeY, 0, gl.RGB, gl.UNSIGNED_BYTE, new Uint8Array(field));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -84,10 +80,15 @@ export function initProgramField(gl, program, width, height)
     
     let fragmentShaderSource = `
       precision mediump float;
+      uniform float width;
+      uniform float height;
       uniform sampler2D uTexture;
       void main() {
-        vec2 st = gl_FragCoord.xy/1000.0; 
-	      gl_FragColor = texture2D(uTexture, st);
+        float x = gl_FragCoord.x/width;
+        float y = gl_FragCoord.y/height;
+	      vec4 c = texture2D(uTexture, vec2(x, y));
+        
+        gl_FragColor = c;
       }
     `;
     
@@ -103,6 +104,12 @@ export function initProgramField(gl, program, width, height)
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     gl.useProgram(program);
+
+    let widthLoc = gl.getUniformLocation(program, "width")
+    let heigthLoc = gl.getUniformLocation(program, "height")
+
+    gl.uniform1f(widthLoc, width);
+    gl.uniform1f(heigthLoc, height);
 }
 
 export function initProgramRect(gl, program, width, height, tileSize)
