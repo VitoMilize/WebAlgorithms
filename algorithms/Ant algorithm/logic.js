@@ -6,10 +6,11 @@ const gl = canvas.getContext("webgl");
 let programField = gl.createProgram();
 let programRect = gl.createProgram();
 
+
 let fieldSize = 100;
 let tileSize = 2/fieldSize;
-initProgramRect(gl, programRect, canvas.width, canvas.height, tileSize);
-initProgramField(gl, programField, canvas.width, canvas.height);
+initProgramRect(gl, programRect,canvas.width, canvas.height, tileSize);
+initProgramField(gl, programField,canvas.width, canvas.height);
 
 let field = new Array(fieldSize);
 for (let i = 0; i < fieldSize; i++) {
@@ -30,7 +31,7 @@ function update()
     //     }
     // }
     drawField(gl, programField)
-    drawRect(gl, programRect, [0.1, 0.1], [1,0,1,1]);
+    drawRect(gl, programRect, [0.1, 0.1], tileSize, [1,0,1,1]);
 
     let t1 = performance.now();
     console.log(t1-t0);

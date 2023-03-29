@@ -1,9 +1,21 @@
-let rectBuffer;
 
-export function drawRect(gl, program, pos, color)
+export function drawRect(gl, program, pos, size, color)
 {
   gl.useProgram(program);
-  gl.bindBuffer(gl.ARRAY_BUFFER, rectBuffer);
+  
+  let positions = new Float32Array([
+    -1, -1+size, //left up
+    -1+size, -1+size, //right up
+    -1, -1, //left down
+    -1+size, -1, //rigth down
+  ]);
+
+  let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+  let buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(positionAttributeLocation);
+  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
   let modelMatrixLocation = gl.getUniformLocation(program, "uModelMatrix");
   let colorUniformLocation = gl.getUniformLocation(program, "u_color");
@@ -12,17 +24,30 @@ export function drawRect(gl, program, pos, color)
   gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
   gl.uniform4fv(colorUniformLocation, color);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    
 }
 
 export function drawField(gl, program)
 {
     gl.useProgram(program);
+  
+    let positions = new Float32Array([
+      -1, 1, //left up
+      1, 1, //right up
+      -1, -1, //left down
+      1, -1, //rigth down
+    ]);
+    let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(positionAttributeLocation);
+    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
     let arr = new Array(100*100*3);
 
     for (let i = 0; i < 100*100*3; i++) {
         if (i % 3 == 0) {
-          arr[i] = 255;
+          arr[i] = Math.random()*255;
         }
         else
         {
@@ -42,7 +67,6 @@ export function drawField(gl, program)
     gl.uniform1i(textureLocation, 0);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    
 }
 
 export function initProgramField(gl, program, width, height)
@@ -62,7 +86,7 @@ export function initProgramField(gl, program, width, height)
       precision mediump float;
       uniform sampler2D uTexture;
       void main() {
-        vec2 st = gl_FragCoord.xy/100.0;
+        vec2 st = gl_FragCoord.xy/1000.0; 
 	      gl_FragColor = texture2D(uTexture, st);
       }
     `;
@@ -79,20 +103,6 @@ export function initProgramField(gl, program, width, height)
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     gl.useProgram(program);
-    
-    let positions = new Float32Array([
-      -1, 1, //left up
-      1, 1, //right up
-      -1, -1, //left down
-      1, -1, //rigth down
-    ]);
-    let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-    let buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-    
 }
 
 export function initProgramRect(gl, program, width, height, tileSize)
@@ -129,19 +139,4 @@ export function initProgramRect(gl, program, width, height, tileSize)
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     gl.useProgram(program);
-    
-    
-    let positions = new Float32Array([
-        -1, -1+tileSize, //left up
-        -1+tileSize, -1+tileSize, //right up
-        -1, -1, //left down
-        -1+tileSize, -1, //rigth down
-    ]);
-    
-    let positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-    rectBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, rectBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 }
