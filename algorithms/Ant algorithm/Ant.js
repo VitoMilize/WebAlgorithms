@@ -41,6 +41,6 @@ export class Ant{
             this.doStep(field, fieldSizeX, fieldSizeY);
         }
 
-        this.dir += Math.sin(x*y)*Math.random()*1 + Math.cos(x+y)*0;
+        this.dir += Math.sin(x*y)*Math.random()*1 + Math.cos(x+y);
     }
 }
