@@ -1,9 +1,12 @@
+let antTarget = {home: 'home', food: 'food'};
+let sniffRange = 2;
+
 export class Ant{
     constructor(dir)
     {
         this.pos = {x: 0, y:0};
         this.speed = 3;
-        this.color = [0.4, 0.1, 0.1, 1.0];
+        this.target = antTarget.home;
         this.randDir();
     }
     randDir = function()
@@ -12,9 +15,20 @@ export class Ant{
     }
     doStep = function(field, fieldSizeX, fieldSizeY)
     {   
+        
         let x = Math.ceil(this.pos.x)
         let y = Math.ceil(this.pos.y)
         field[(y*fieldSizeX+x)*3] = 255;
+        this.dir += Math.sin(x*y+1)*Math.random()*1 + Math.cos(x+y+1);
+
+        for (let i = x - sniffRange; i < x + sniffRange; i++) {
+            for (let j = y - sniffRange; j < y + sniffRange; j++) {
+                if(0 <= i && i < fieldSizeX && 0 <= j < fieldSizeY)
+                {
+                    field[(y*fieldSizeX+x)*3+2];
+                }
+            }
+        }
 
         let newPosX = this.pos.x + Math.cos(this.dir) * this.speed;
         let newPosY = this.pos.y + Math.sin(this.dir) * this.speed;
@@ -41,6 +55,7 @@ export class Ant{
             this.doStep(field, fieldSizeX, fieldSizeY);
         }
 
-        this.dir += Math.sin(x*y)*Math.random()*1 + Math.cos(x+y);
+        // this.dir = this.dir % (Math.PI * 2);
+        // console.log(this.dir);
     }
 }

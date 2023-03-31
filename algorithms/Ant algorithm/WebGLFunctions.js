@@ -30,7 +30,7 @@ export function drawField(gl, program, field, sizeX, sizeY)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
-export function initProgramField(gl, program, width, height)
+export function initProgramField(gl, program, width, height, colors, ids)
 {
     gl.viewport(0, 0, width, height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -45,15 +45,33 @@ export function initProgramField(gl, program, width, height)
     
     let fragmentShaderSource = `
       precision mediump float;
+      const int len = ${Object.keys(colors).length};
       uniform float width;
       uniform float height;
+      uniform vec4 colors[len];
+      uniform float ids[len];
       uniform sampler2D uTexture;
       void main() {
         float x = gl_FragCoord.x/width;
         float y = gl_FragCoord.y/height;
 	      vec4 c = texture2D(uTexture, vec2(x, y));
-        
-        gl_FragColor = c;
+        bool idColor = false;
+        for(int i = 0; i < len; i++)
+        {
+          if(abs(c.g - ids[i]/255.0) < 0.0001)
+          {
+            c = colors[i];
+            idColor = true;
+          }
+        }
+        if(idColor)
+        {
+          gl_FragColor = c;
+        }
+        else
+        {
+          gl_FragColor = vec4(c.r, 0, c.b, 1.0);
+        } 
       }
     `;
     
@@ -70,14 +88,20 @@ export function initProgramField(gl, program, width, height)
     gl.linkProgram(program);
     gl.useProgram(program);
 
-    let widthLoc = gl.getUniformLocation(program, "width")
-    let heigthLoc = gl.getUniformLocation(program, "height")
+    let widthLoc = gl.getUniformLocation(program, "width");
+    let heigthLoc = gl.getUniformLocation(program, "height");
+    
+    let colorsLoc = gl.getUniformLocation(program, "colors");
+    let idsLoc = gl.getUniformLocation(program, "ids");
 
     gl.uniform1f(widthLoc, width);
     gl.uniform1f(heigthLoc, height);
+
+    gl.uniform4fv(colorsLoc, Object.values(colors).flat());
+    gl.uniform1fv(idsLoc, Object.values(ids));
 }
 
-export function drawAnt(gl, program, ratio, size, ant)
+export function drawAnt(gl, program, ratio, size, ant, colors)
 {
   gl.useProgram(program);
   
@@ -113,7 +137,15 @@ export function drawAnt(gl, program, ratio, size, ant)
   mat4.mul(modelMatrix, scaleMatrix, rotationMatrix);
   mat4.mul(modelMatrix, translationMatrix, modelMatrix);
   gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
-  gl.uniform4fv(colorUniformLocation, ant.color);
+
+  if (ant.target == 'home') {
+    gl.uniform4fv(colorUniformLocation, colors.antHome);
+  }
+  else 
+  {
+    gl.uniform4fv(colorUniformLocation, colors.foodHome);
+  }
+
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, positions.length); 
 }
 
