@@ -11,9 +11,10 @@
 <body>
     <label for="size">Введите размер лабиринта:</label>
     <input type="number" id="size" name="size">
-    <button onclick="getTable()">Создать лабиринт</button>
-
+    <button onclick="CreateMaze()">Создать лабиринт</button>
     <div class="matrix"> </div>
+
+    <button onclick="searchWay()">Найти путь</button>
     <script src="./logic.js"></script>
 </body>
 
