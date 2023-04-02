@@ -105,6 +105,7 @@ function regenerate()
     draw({x:250, y:150}, brushTypes.food, 20);
     createAnts();
     drySpeed = inputDrySpeed.value;
+    createAnts();
 }
 regenerate();
 
@@ -134,6 +135,7 @@ function getFieldXY(event)
     y = parseInt(y/tileSizePixels);
     return {x:x, y:y};
 }
+
 
 function fieldMauseDown(event)
 {
@@ -230,7 +232,6 @@ function updateGame()
         ants[i].doStep(field, fieldSizeX, fieldSizeY, objId);
     }
 }
-
 let t0;
 function update()
 {
