@@ -2,16 +2,31 @@ let map;
 let context;
 let button;
 let points = [];
-let path = [];
+let adjacencyMatrix = [];
+let amountOfCity;
+let populationSize;
+let inputPopulationSize;
+let mutationRate;
+let inputMutationRate;
 initMap();
-initButton();
+initButtonStart();
+initInputPopulationSize();
+initInputMutationRate();
 
 function initMap() {
-    map = document.querySelector(".map");
+    map = document.getElementById("map");
     map.width = map.offsetWidth;
     map.height = map.offsetHeight;
     context = map.getContext("2d");
     map.addEventListener("click", handleClick);
+}
+
+function initInputPopulationSize() {
+    inputPopulationSize = document.getElementById("inputPopulationSize");
+}
+
+function initInputMutationRate() {
+    inputMutationRate = document.getElementById("inputMutationRate");
 }
 
 function handleClick(event) {
@@ -29,71 +44,202 @@ function handleClick(event) {
     }
 }
 
-function initButton() {
-    button = document.querySelector(".button");
+function initButtonStart() {
+    button = document.getElementById("buttonStart");
     button.width = button.offsetWidth;
     button.height = button.offsetHeight;
     button.textContent = "Запуск";
     button.addEventListener("click", resultClick);
 }
 function resultClick() {
-    path = tsp(points);
-    console.log(path);
+    amountOfCity = points.length;
+    populationSize = inputPopulationSize.value === "" ? 10 : inputPopulationSize.value;
+    mutationRate = inputMutationRate.value === "" ? 10 : inputMutationRate.value;
+    adjacencyMatrix = createAdjacencyMatrix();
+    TSPUtil();
 }
 
 function getDistance(point1, point2) {
     return Math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2);
 }
 
-// function createAdjacencyMatrix() {
-//     const size = points.size;
-//     const matrix = new Array(size);
-//
-//     for (let i = 0; i < size; i++) {
-//         matrix[i] = new Array(size);
-//         for (let j = 0; j < size; j++)
-//             matrix[i][j] = i === j ? 0 : distanceBetweenPoints(points[i], points[j]);
-//     }
-//
-//     return matrix;
-// }
+function createAdjacencyMatrix() {
+    const matrix = new Array(points.length);
 
-function tsp(points) {
-    const n = points.length;
-    const visited = new Array(n).fill(false);
-    visited[0] = true;
-
-    let current = 0;
-    let path = [current];
-    let length = 0;
-
-    for (let i = 0; i < n - 1; i++) {
-        let nearest = -1;
-        let minDistance = Infinity;
-
-        for (let j = 0; j < n; j++) {
-            if (!visited[j]) {
-                const distance = getDistance(points[current], points[j]);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    nearest = j;
-                }
-            }
-        }
-
-        visited[nearest] = true;
-        path.push(nearest);
-        length += minDistance;
-        current = nearest;
-        for (let j = 0; j < path.length - 1; j++) {
-            context.beginPath();
-            context.moveTo(points[path[j]].x, points[path[j]].y);
-            context.lineTo(points[path[j + 1]].x, points[path[j + 1]].y);
-            context.stroke();
-        }
+    for (let i = 0; i < points.length; i++) {
+        matrix[i] = new Array(points.length);
+        for (let j = 0; j < points.length; j++)
+            matrix[i][j] = i === j ? 0 : getDistance(points[i], points[j]);
     }
 
-    return path;
+    return matrix;
 }
+
+class individual {
+    gnome = [];
+    fitness;
+    constructor(gnome, fitness) {
+        this.gnome = gnome;
+        this.fitness = fitness;
+    }
+}
+
+function randNum(start, end) {
+    return start + Math.floor(Math.random() * (end - start));
+}
+
+function repeat(gnome, char) {
+    for (let i = 0; i < gnome.length; i++)
+        if (gnome[i] === char)
+            return true;
+    return false;
+}
+
+function createGnome() {
+    let gnome = [0];
+    while (true) {
+        if (gnome.length === amountOfCity) {
+            gnome.push(0);
+            break;
+        }
+        let temp = randNum(1, amountOfCity);
+        if (!repeat(gnome, temp))
+            gnome.push(temp);
+    }
+    return gnome;
+}
+
+function calFitness(gnome) {
+    let fitness = 0;
+    for (let i = 0; i < gnome.length - 1; i++)
+        fitness += adjacencyMatrix[gnome[i]][gnome[i + 1]];
+    return fitness;
+}
+
+function findBestPath(population, bestPath) {
+    for (let i = 0; i < populationSize; i++)
+        if (population[i].fitness < bestPath.fitness)
+            bestPath = population[i];
+    return bestPath
+}
+
+function drawPath(gnome) {
+    context.clearRect(0, 0, map.width, map.height);
+    for (let i = 0; i < points.length; i++) {
+        context.beginPath();
+        context.arc(points[i].x, points[i].y, 2, 0, 2 * Math.PI);
+        context.fill();
+    }
+    context.beginPath();
+    context.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < gnome.length; i++) {
+        context.lineTo(points[gnome[i]].x, points[gnome[i]].y);
+    }
+    context.closePath();
+    context.stroke();
+}
+
+function randomWithProbability(probability) {
+    const randomNum = Math.floor(Math.random() * 101);
+    return randomNum <= probability;
+}
+
+function crossover(parent1, parent2) {
+    const breakpoint = Math.floor(Math.random() * (amountOfCity));
+
+    const childGnome = [];
+
+    for (let i = 0; i < breakpoint; i++) {
+        childGnome.push(parent1.gnome[i]);
+    }
+
+    let index = breakpoint;
+    for (let i = 0; i < amountOfCity; i++) {
+        const gene = parent2.gnome[i];
+        if (!childGnome.includes(gene)) {
+            childGnome.push(gene);
+            index++;
+            if (index >= amountOfCity)
+                break;
+        }
+    }
+    childGnome.push(0);
+
+    return new individual(childGnome, calFitness(childGnome));
+}
+
+function crossoverPopulation(population) {
+    const offspring = [];
+
+    while (offspring.length < populationSize) {
+        const parent1 = population[Math.floor(Math.random() * population.length)];
+        const parent2 = population[Math.floor(Math.random() * population.length)];
+
+        const child = crossover(parent1, parent2);
+
+        offspring.push(child);
+    }
+    return offspring;
+}
+
+function mutatedGene(gnome) {
+    const newGnome = [...gnome];
+    while (true) {
+        const gene1 = randNum(1, amountOfCity - 1);
+        const gene2 = randNum(1, amountOfCity - 1);
+        if (gene1 !== gene2) {
+            const temp = newGnome[gene1];
+            newGnome[gene1] = newGnome[gene2];
+            newGnome[gene2] = temp;
+            break;
+        }
+    }
+    return new individual(newGnome, calFitness(newGnome));
+}
+
+function mutatePopulation(population) {
+    const mutatedPopulation = population;
+    for (let i = 0; i < populationSize; i++)
+        if (randomWithProbability(mutationRate))
+            mutatedPopulation[i] = mutatedGene(population[i].gnome);
+
+    return mutatedPopulation;
+}
+
+
+function TSPUtil() {
+    let gen = 1;
+    const gen_thres = 1000;
+
+    let population = [];
+
+    for (let i = 0; i < populationSize; i++) {
+        let temp = new individual();
+        temp.gnome = createGnome();
+        temp.fitness = calFitness(temp.gnome);
+        population.push(temp);
+    }
+
+    let bestPath = new individual(null, Infinity)
+    bestPath = findBestPath(population, bestPath);
+    console.log(bestPath.gnome + " " + bestPath.fitness);
+    drawPath(bestPath.gnome);
+
+    while (gen <= gen_thres) {
+        let new_population = crossoverPopulation(population);
+        new_population = mutatePopulation(new_population);
+
+        population = new_population;
+        let bestPathInPopulation = findBestPath(population, bestPath);
+        if (bestPath !== bestPathInPopulation) {
+            bestPath = bestPathInPopulation;
+            drawPath(bestPath.gnome);
+        }
+        console.log(bestPath.gnome + " " + bestPath.fitness);
+
+        gen++;
+    }
+}
+
 
 

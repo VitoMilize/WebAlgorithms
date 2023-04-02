@@ -6,8 +6,12 @@
     <title>main</title>
 </head>
 <body>
-    <button class="button"></button>
-    <canvas class="map"></canvas>
+    <button class="button" id="buttonStart"></button>
+    <label for="inputPopulationSize">Размер популяции</label>
+    <input type="number" id="inputPopulationSize" placeholder="10">
+    <label for="inputMutationRate">Вероятность мутации(%)</label>
+    <input type="number" id="inputMutationRate" placeholder="10">
+    <canvas class="map" id="map"></canvas>
     <script src="./logic.js"></script>
 </body>
 </html>
