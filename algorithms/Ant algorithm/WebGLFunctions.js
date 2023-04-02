@@ -138,12 +138,12 @@ export function drawAnt(gl, program, ratio, size, ant, colors)
   mat4.mul(modelMatrix, translationMatrix, modelMatrix);
   gl.uniformMatrix4fv(modelMatrixLocation, false, modelMatrix);
 
-  if (ant.target == 'home') {
-    gl.uniform4fv(colorUniformLocation, colors.antHome);
+  if (ant.target == 'food') {
+    gl.uniform4fv(colorUniformLocation, colors.antTargetFood);
   }
   else 
   {
-    gl.uniform4fv(colorUniformLocation, colors.foodHome);
+    gl.uniform4fv(colorUniformLocation, colors.antTargetHome);
   }
 
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, positions.length); 
