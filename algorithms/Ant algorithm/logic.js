@@ -66,8 +66,8 @@ let fieldColors = {
 }
 
 let antsColors = {
-    antHome : [255, 100, 100, 255],
-    antFood : [100, 100, 255, 255],
+    antTargetFood : [255, 100, 100, 255],
+    antTargetHome : [100, 100, 255, 255],
 }
 
 for (const key in fieldColors) {
@@ -83,7 +83,7 @@ for (const key in antsColors) {
     antsColors[key][3] /= 255;
 }
 
-function cereateField()
+function createField()
 {
     fieldSizeX = parseInt(inputFieldSize.value);
     fieldSizeY = parseInt(inputFieldSize.value * ratio);
@@ -100,8 +100,10 @@ function cereateField()
 
 function regenerate()
 {
+    createField();
+    draw({x:100, y:100}, brushTypes.home, 20);
+    draw({x:250, y:150}, brushTypes.food, 20);
     createAnts();
-    cereateField();
     drySpeed = inputDrySpeed.value;
 }
 regenerate();
@@ -110,8 +112,17 @@ function createAnts()
 {
     antCount = parseInt(inputAntCount.value);
     ants = new Array(antCount);
+    let positions = [];
+    for (let i = 0; i < fieldSizeX; i++) {
+        for (let j = 0; j < fieldSizeY; j++) {
+            if(field[(j*fieldSizeX+i)*3+1] == objId.home)
+            {
+                positions.push({x:i, y:j});
+            }
+        }
+    }
     for (let i = 0; i < antCount; i++) {
-        ants[i] = new Ant();
+        ants[i] = new Ant({x:100, y:100});
     }
 }
 
@@ -122,16 +133,6 @@ function getFieldXY(event)
     x = parseInt(x/tileSizePixels);
     y = parseInt(y/tileSizePixels);
     return {x:x, y:y};
-}
-
-function setAnthill(pos)
-{
-    field[(pos.y*fieldSizeX+pos.x)*3]=255;
-    field[(pos.y*fieldSizeX+pos.x)*3 + 1]=128;
-    // for (let i = 0; i < antCount; i++) {
-    //    ants[i].pos = {x:x, y:y};
-    //    ants[i].randDir();
-    // }
 }
 
 function fieldMauseDown(event)
@@ -226,7 +227,7 @@ function updateGame()
 {
     dryField();
     for (let i = 0; i < antCount; i++) {
-        ants[i].doStep(field, fieldSizeX, fieldSizeY);
+        ants[i].doStep(field, fieldSizeX, fieldSizeY, objId);
     }
 }
 
