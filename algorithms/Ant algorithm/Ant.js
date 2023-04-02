@@ -28,13 +28,6 @@ function getMarker(x, y, field, fieldSizeX, fieldSizeY, color)
     else return field[(y*fieldSizeX+x)*3+2];
 }
 
-function angleVectors(vec1, vec2)
-{
-    let scalar = vec1.x * vec2.x + vec1.y * vec2.y;
-    let angle = Math.acos(scalar/Math.sqrt(vec2.x*vec2.x + vec2.y*vec2.y));
-    return angle;
-}
-
 function transitionProbability(x, y, dir, tileX, tileY, marker)
 {
     let vec1 = {x:Math.cos(dir), y:Math.sin(dir)};
