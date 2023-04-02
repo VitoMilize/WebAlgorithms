@@ -102,7 +102,8 @@ function regenerate()
 {
     createField();
     draw({x:100, y:100}, brushTypes.home, 20);
-    draw({x:300, y:100}, brushTypes.food, 20);
+    draw({x:250, y:150}, brushTypes.food, 20);
+    createAnts();
     drySpeed = inputDrySpeed.value;
     createAnts();
 }
@@ -112,20 +113,17 @@ function createAnts()
 {
     antCount = parseInt(inputAntCount.value);
     ants = new Array(antCount);
-    let homeTiles = new Array();
-    for(let i = 0; i < fieldSizeX; i++)
-    {
-        for(let j = 0; j < fieldSizeY; j++)
-        {
-            if(field[(j*fieldSizeX+i)*3 + 1] == objId.home)
+    let positions = [];
+    for (let i = 0; i < fieldSizeX; i++) {
+        for (let j = 0; j < fieldSizeY; j++) {
+            if(field[(j*fieldSizeX+i)*3+1] == objId.home)
             {
-                homeTiles.push({x:i, y:j});
+                positions.push({x:i, y:j});
             }
         }
     }
     for (let i = 0; i < antCount; i++) {
-        ants[i] = new Ant(homeTiles[Math.ceil(homeTiles.length * Math.random())]);
-        ants[i].speed = inputAntSpeed.value;
+        ants[i] = new Ant({x:100, y:100});
     }
 }
 
