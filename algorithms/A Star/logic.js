@@ -3,6 +3,8 @@ let beginX;
 let beginY;
 let endX = 1;
 let endY = 1;
+const mazeListener = document.getElementById("maze");
+$("#maze");
 
 let addingBegin = false;
 let addingEnd = false;
@@ -136,6 +138,7 @@ function CreateMaze() {
       cell = document.createElement("div");
       cell.style.width = 612 / size + "px";
       cell.style.height = 612 / size + "px";
+      cell.id = `${i}_${j}`
       if (map[i][j] == 0) {
         cell.style.background = "rgb(255, 255, 255)";
       }
@@ -152,17 +155,18 @@ function CreateMaze() {
     }
     matrix.appendChild(row);
   }
+  //$(`#${0}_${0}`).css('background-color', 'rgb(128, 128, 128)');
 }
 
+
 function searchWay() {
-  //console.log(beginX, beginY, endX, endY);
+  let matrix = document.querySelector(".matrix");
   let sizeInput = document.getElementById("size");
   let size = parseInt(sizeInput.value);
   if (size % 2 == 0) {
     size++;
   }
 
-  //необходимо перевести map сюда
   let check = new Array(size);
   let way = new Array(size)
   for (let i = 0; i < size; i++) {
@@ -182,6 +186,7 @@ function searchWay() {
 
   let x;
   let y;
+  let f = false;
   while (queueX.length != 0) {
     x = queueX[0];
     y = queueY[0];
@@ -210,10 +215,18 @@ function searchWay() {
     }
 
     if (check[endX][endY] == 1) {
+      f = true;
       break;
+    }
+    if (x != beginX || y != beginY) {
+      $(`#${x}_${y}`).css('background-color', 'rgb(139, 0, 255)');
     }
   }
 
+  if (f == false) {
+    alert("Молодец блять, пути нет!");
+    return;
+  }
   x = endX;
   y = endY;
   while (true) {
@@ -233,39 +246,32 @@ function searchWay() {
       map[x][y] = 4;
       y = y - 1;
     }
-    else if (x == beginX && y == beginY) {
+    if (x == beginX && y == beginY) {
       map[x][y] = 4;
       break;
     }
-
+    $(`#${x}_${y}`).css('background-color', 'rgb(255, 255, 0)');
   }
+}
+
+function CreateWall() {
   let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
   let rows = matrix.children; // получаем строки матрицы
   for (let i = 0; i < rows.length; i++) {
     let cells = rows[i].children; // получаем ячейки в каждой строке
     for (let j = 0; j < cells.length; j++) {
-      if (map[i][j] == 4) { // если значение в матрице равно 4
-        cells[j].style.background = "rgb(255, 255, 0)";; // изменяем цвет ячейки на желтый
-      }
+      cells[j].addEventListener("click", () => {
+        if (map[i][j] == 0) {
+          map[i][j] = 1;
+          cells[j].style.background = "rgb(0, 0, 0)";
+        }
+        else if (map[i][j] == 1) {
+          map[i][j] = 0;
+          cells[j].style.background = "rgb(255, 255, 255)";
+        }
+      });
     }
   }
-
-}
-
-function CreateWall() {
-  // получаем все ячейки матрицы
-  let cells = document.querySelectorAll(".matrix div");
-
-  // перебираем все ячейки и добавляем обработчик события клика
-  cells.forEach(cell => {
-    cell.addEventListener("click", () => {
-      if (cell.style.background == "rgb(255, 255, 255)") {
-        cell.style.background = "rgb(0, 0, 0)";
-      } else {
-        cell.style.background = "rgb(255, 255, 255)";
-      }
-    });
-  });
 }
 
 function CreateBegin() {
