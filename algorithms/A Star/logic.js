@@ -1,8 +1,11 @@
+let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
 let map = new Array(size);
 let beginX;
 let beginY;
 let endX = 1;
 let endY = 1;
+let check = 0;
+let create = 0;
 const mazeListener = document.getElementById("maze");
 $("#maze");
 
@@ -12,7 +15,6 @@ let addingEnd = false;
 function CreateMaze() {
   beginX = 1;
   beginY = 1;
-  let matrix = document.querySelector(".matrix");
   while (matrix.firstChild) {
     matrix.removeChild(matrix.firstChild);
   }
@@ -156,11 +158,14 @@ function CreateMaze() {
     matrix.appendChild(row);
   }
   //$(`#${0}_${0}`).css('background-color', 'rgb(128, 128, 128)');
+  editMap();
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-function searchWay() {
-  let matrix = document.querySelector(".matrix");
+async function searchWay() {
   let sizeInput = document.getElementById("size");
   let size = parseInt(sizeInput.value);
   if (size % 2 == 0) {
@@ -221,6 +226,7 @@ function searchWay() {
     if (x != beginX || y != beginY) {
       $(`#${x}_${y}`).css('background-color', 'rgb(139, 0, 255)');
     }
+    await sleep(1);
   }
 
   if (f == false) {
@@ -251,69 +257,53 @@ function searchWay() {
       break;
     }
     $(`#${x}_${y}`).css('background-color', 'rgb(255, 255, 0)');
+    await sleep(10);
   }
 }
 
 function CreateWall() {
-  let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
-  let rows = matrix.children; // получаем строки матрицы
-  for (let i = 0; i < rows.length; i++) {
-    let cells = rows[i].children; // получаем ячейки в каждой строке
-    for (let j = 0; j < cells.length; j++) {
-      cells[j].addEventListener("click", () => {
-        if (map[i][j] == 0) {
-          map[i][j] = 1;
-          cells[j].style.background = "rgb(0, 0, 0)";
-        }
-        else if (map[i][j] == 1) {
-          map[i][j] = 0;
-          cells[j].style.background = "rgb(255, 255, 255)";
-        }
-      });
-    }
-  }
+  create = 1;
 }
 
 function CreateBegin() {
+  create = 2;
+}
 
 
-  let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
-  let rows = matrix.children; // получаем строки матрицы
+function CreateEnd() {
+  create = 3;
+}
+function editMap() {
+  let rows = matrix.children;
   for (let i = 0; i < rows.length; i++) {
-    let cells = rows[i].children; // получаем ячейки в каждой строке
+    let cells = rows[i].children;
     for (let j = 0; j < cells.length; j++) {
       cells[j].addEventListener("click", () => {
-        if (map[i][j] == 0) {
+        if (map[i][j] == 0 && create == 1) {
+          map[i][j] = 1;
+          cells[j].style.background = "rgb(0, 0, 0)";
+        }
+        else if (map[i][j] == 1 && create == 1) {
+          map[i][j] = 0;
+          cells[j].style.background = "rgb(255, 255, 255)";
+        }
+        else if (map[i][j] == 0 && create == 2) {
           map[i][j] = 2;
           beginX = i;
           beginY = j;
           cells[j].style.background = "rgb(0, 255, 0)";
         }
-        else if (map[i][j] == 2) {
+        else if (map[i][j] == 2 && create == 2) {
           map[i][j] = 0;
           cells[j].style.background = "rgb(255, 255, 255)";
         }
-      });
-    }
-  }
-}
-
-
-function CreateEnd() {
-
-  let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
-  let rows = matrix.children; // получаем строки матрицы
-  for (let i = 0; i < rows.length; i++) {
-    let cells = rows[i].children; // получаем ячейки в каждой строке
-    for (let j = 0; j < cells.length; j++) {
-      cells[j].addEventListener("click", () => {
-        if (map[i][j] == 0) {
+        else if (map[i][j] == 0 && create == 3) {
           map[i][j] = 3;
           endX = i;
           endY = j;
           cells[j].style.background = "rgb(255, 0, 0)";
         }
-        else if (map[i][j] == 3) {
+        else if (map[i][j] == 3 && create == 3) {
           map[i][j] = 0;
           cells[j].style.background = "rgb(255, 255, 255)";
         }
