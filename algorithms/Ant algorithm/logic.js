@@ -161,9 +161,11 @@ function draw(pos, brush, size)
                 switch (brush) {
                     case brushTypes.home:
                         field[(j*fieldSizeX+i)*3+1] = objId.home;
+                        field[(j*fieldSizeX+i)*3] = 255;
                         break;
                     case brushTypes.food:
                         field[(j*fieldSizeX+i)*3+1] = objId.food;
+                        field[(j*fieldSizeX+i)*3+2] = 255;
                         break;
                     case brushTypes.obstacle:
                         field[(j*fieldSizeX+i)*3+1] = objId.obstacle;
@@ -195,33 +197,37 @@ function dryField()
 {
     for(let i = 0; i < fieldSizeX * fieldSizeY; i++)
     {
-        let el = field[i*3];
-        if(el > 0)
-        {
-            if(el - drySpeed >= 0)
-            {
-                el -= drySpeed;
-            }
-            else
-            {
-                el = 0;
-            }
-        }
-        field[i*3] = el;
+        // let el = field[i*3];
+        // if(el > 0)
+        // {
+        //     if(el - drySpeed >= 0)
+        //     {
+        //         el -= drySpeed;
+        //     }
+        //     else
+        //     {
+        //         el = 0;
+        //     }
+        // }
+        // field[i*3] = el;
 
-        el = field[i*3+2];
-        if(el > 0)
-        {
-            if(el - drySpeed >= 0)
-            {
-                el -= drySpeed;
-            }
-            else
-            {
-                el = 0;
-            }
-        }
-        field[i*3+2] = el;
+        // el = field[i*3+2];
+        // if(el > 0)
+        // {
+        //     if(el - drySpeed >= 0)
+        //     {
+        //         el -= drySpeed;
+        //     }
+        //     else
+        //     {
+        //         el = 0;
+        //     }
+        // }
+        // field[i*3+2] = el;
+        if(field[i*3 + 1] != objId.home)
+            field[i*3] *= 0.997;
+        if(field[i*3 + 1] != objId.food)
+            field[i*3+2] *= 0.997;
     }
 }
 
