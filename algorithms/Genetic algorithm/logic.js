@@ -8,10 +8,13 @@ let populationSize;
 let inputPopulationSize;
 let mutationRate;
 let inputMutationRate;
+let amountOfGenerations;
+let inputAmountOfGenerations;
 initMap();
 initButtonStart();
 initInputPopulationSize();
 initInputMutationRate();
+initInputAmountOfGenerations();
 
 function initMap() {
     map = document.getElementById("map");
@@ -19,6 +22,10 @@ function initMap() {
     map.height = map.offsetHeight;
     context = map.getContext("2d");
     map.addEventListener("click", handleClick);
+}
+
+function initInputAmountOfGenerations() {
+    inputAmountOfGenerations = document.getElementById("inputAmountOfGenerations");
 }
 
 function initInputPopulationSize() {
@@ -53,6 +60,7 @@ function initButtonStart() {
 }
 function resultClick() {
     amountOfCity = points.length;
+    amountOfGenerations = inputAmountOfGenerations.value === "" ? 500 : inputAmountOfGenerations.value;
     populationSize = inputPopulationSize.value === "" ? 10 : inputPopulationSize.value;
     mutationRate = inputMutationRate.value === "" ? 10 : inputMutationRate.value;
     adjacencyMatrix = createAdjacencyMatrix();
@@ -88,13 +96,6 @@ function randNum(start, end) {
     return start + Math.floor(Math.random() * (end - start));
 }
 
-function repeat(gnome, char) {
-    for (let i = 0; i < gnome.length; i++)
-        if (gnome[i] === char)
-            return true;
-    return false;
-}
-
 function createGnome() {
     let gnome = [0];
     while (true) {
@@ -103,7 +104,7 @@ function createGnome() {
             break;
         }
         let temp = randNum(1, amountOfCity);
-        if (!repeat(gnome, temp))
+        if (!gnome.includes(temp))
             gnome.push(temp);
     }
     return gnome;
@@ -130,13 +131,13 @@ function drawPath(gnome) {
         context.arc(points[i].x, points[i].y, 2, 0, 2 * Math.PI);
         context.fill();
     }
-    context.beginPath();
-    context.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < gnome.length; i++) {
+        context.beginPath();
+        context.moveTo(points[gnome[i - 1]].x, points[gnome[i - 1]].y);
         context.lineTo(points[gnome[i]].x, points[gnome[i]].y);
+        context.closePath();
+        context.stroke();
     }
-    context.closePath();
-    context.stroke();
 }
 
 function randomWithProbability(probability) {
@@ -153,15 +154,10 @@ function crossover(parent1, parent2) {
         childGnome.push(parent1.gnome[i]);
     }
 
-    let index = breakpoint;
     for (let i = 0; i < amountOfCity; i++) {
         const gene = parent2.gnome[i];
-        if (!childGnome.includes(gene)) {
+        if (!childGnome.includes(gene))
             childGnome.push(gene);
-            index++;
-            if (index >= amountOfCity)
-                break;
-        }
     }
     childGnome.push(0);
 
@@ -194,6 +190,7 @@ function mutatedGene(gnome) {
             break;
         }
     }
+
     return new individual(newGnome, calFitness(newGnome));
 }
 
@@ -208,8 +205,7 @@ function mutatePopulation(population) {
 
 
 function TSPUtil() {
-    let gen = 1;
-    const gen_thres = 1000;
+    let generation = 1;
 
     let population = [];
 
@@ -225,7 +221,7 @@ function TSPUtil() {
     console.log(bestPath.gnome + " " + bestPath.fitness);
     drawPath(bestPath.gnome);
 
-    while (gen <= gen_thres) {
+    while (generation <= amountOfGenerations) {
         let new_population = crossoverPopulation(population);
         new_population = mutatePopulation(new_population);
 
@@ -237,7 +233,7 @@ function TSPUtil() {
         }
         console.log(bestPath.gnome + " " + bestPath.fitness);
 
-        gen++;
+        generation++;
     }
 }
 
