@@ -1,14 +1,14 @@
 let antTarget = {home: 'home', food: 'food'};
 let sniffRange = 5;
-
-function transitionProb(antX, antY, dir, tileX, tileY, marker)
+let markerIntensity = 100;
+function transitionProb(antX, antY, dir, tileX, tileY, marker1, clock)
 {
     let dirVec = {x: Math.cos(dir), y: Math.sin(dir)};
     let tileVec = {x: tileX - antX, y: tileY - antY};
     let scalar = dirVec.x * tileVec.x + dirVec.y * tileVec.y;
     let modul = Math.sqrt(tileVec.x * tileVec.x + tileVec.y * tileVec.y);
     let angle = Math.acos(scalar/modul);
-    return (1 - angle/Math.PI) /** (Math.random()*0.5 + 0.5)*/ + marker/255 * (Math.random()*1.3 - 0.9) * 6 //* (modul / sniffRange);
+    return (1 - angle/Math.PI) + marker1/255 * (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;
 }
 
 function angleVectors(x1, y1, x2, y2)
@@ -28,15 +28,6 @@ function getMarker(x, y, field, fieldSizeX, fieldSizeY, color)
     else return field[(y*fieldSizeX+x)*3+2];
 }
 
-function transitionProbability(x, y, dir, tileX, tileY, marker1, marker2)
-{
-    let vec1 = {x:Math.cos(dir), y:Math.sin(dir)};
-    let vec2 = {x:tileX - x, y:tileY - y};
-    let angle = angleVectors(vec1, vec2);
-    return (1 - angle/Math.PI) * marker1/255 * (Math.random()*0.25 - 0.03) * 1.5 - marker2/255*Math.random()*1.2;
-}
-
-
 export class Ant{
     constructor(pos)
     {
@@ -44,6 +35,7 @@ export class Ant{
         this.pos = pos;
         this.speed = 1;
         this.target = antTarget.food;
+        this.clock = 0;
         this.randDir();
     }
     randDir = function()
@@ -60,25 +52,30 @@ export class Ant{
         {
             this.target = antTarget.home;
             this.dir -= Math.PI;
+            this.clock = 0;
         }
         if(field[(y*fieldSizeX+x)*3 + 1] == objId.home && this.target == antTarget.home) 
         {
             this.target = antTarget.food;
             this.dir -= Math.PI;
+            this.clock = 0;
         }
 
         if(this.target == antTarget.food)
         {
-            field[(y*fieldSizeX+x)*3] += 20;
+            field[(y*fieldSizeX+x)*3] += markerIntensity * Math.exp(-0.005 * this.clock);
+            //field[(y*fieldSizeX+x)*3] = Math.max(field[(y*fieldSizeX+x)*3], markerIntensity * Math.exp(-0.005 * this.clock));
             if(field[(y*fieldSizeX+x)*3]>255) field[(y*fieldSizeX+x)*3] = 255;
         }
         else
         {
-            field[(y*fieldSizeX+x)*3 + 2] += 20;
+            field[(y*fieldSizeX+x)*3 + 2] += markerIntensity * Math.exp(-0.005 * this.clock);
+            //field[(y*fieldSizeX+x)*3 + 2] = Math.max(field[(y*fieldSizeX+x)*3 + 2], markerIntensity * Math.exp(-0.005 * this.clock));
             if(field[(y*fieldSizeX+x)*3 + 2]>255) field[(y*fieldSizeX+x)*3 + 2] = 255;
         }
 
-        this.dir += Math.sin(x*y+1)*Math.random()*0.3;
+        //this.dir += Math.sin(x*y+1)*Math.random()*0.3;
+        // this.dir += (Math.random() - 0.5) * Math.PI/8;
 
         let maxProb = 0;
         let tile;
@@ -87,18 +84,18 @@ export class Ant{
                 if(i == x && j == y) continue;
                 if(-1 <= i && i < fieldSizeX+1 && -1 <= j && j < fieldSizeY+1)
                 {
-                    let s1, s2;
+                    let marker1, marker2;
                     if(this.target == antTarget.food) 
                     {
-                        s1 = 'b';
-                        s2 = 'r';
+                        marker1 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'b')
+                        marker2 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'r')
                     }
                     else 
                     {
-                        s1 = 'r';
-                        s2 = 'b';
+                        marker1 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'r')
+                        marker2 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'b')
                     }
-                    let prob = transitionProb(x, y, this.dir, i, j, getMarker(i, j, field, fieldSizeX, fieldSizeY, s1), getMarker(i, j, field, fieldSizeX, fieldSizeY, s2));
+                    let prob = transitionProb(x, y, this.dir, i, j, marker1, this.clock);
                     if(prob > maxProb)
                     {
                         maxProb = prob;
@@ -110,6 +107,7 @@ export class Ant{
 
 
         this.dir = angleVectors(1, 0, tile.x - x, tile.y - y);
+        this.dir += (Math.random() - 0.5) * Math.PI/8;
 
         let newPosX = this.pos.x + Math.cos(this.dir) * this.speed;
         let newPosY = this.pos.y + Math.sin(this.dir) * this.speed;
@@ -134,38 +132,7 @@ export class Ant{
         {
             this.dir = -this.dir;
         }
+
+        this.clock++;
     }
-    // doStep = function(field, fieldSizeX, fieldSizeY)
-    // {   
-    //     let x = Math.ceil(this.pos.x)
-    //     let y = Math.ceil(this.pos.y)
-    //     field[(y*fieldSizeX+x)*3] += 50;
-
-    //     let newPosX = this.pos.x + Math.cos(this.dir) * this.speed;
-    //     let newPosY = this.pos.y + Math.sin(this.dir) * this.speed;
-
-    //     if(0 <= newPosX && newPosX < fieldSizeX)
-    //     {
-    //         this.pos.x = newPosX;
-    //     }
-    //     else
-    //     {
-    //         if(Math.sin(this.dir) < 0)
-    //             this.dir = Math.PI*2 - Math.acos(-Math.cos(this.dir));
-    //         else
-    //             this.dir = Math.acos(-Math.cos(this.dir));
-    //         this.doStep(field, fieldSizeX, fieldSizeY);
-    //     }
-    //     if(0 <= newPosY && newPosY < fieldSizeY)
-    //     {
-    //         this.pos.y = newPosY;
-    //     }
-    //     else
-    //     {
-    //         this.dir = -this.dir;
-    //         this.doStep(field, fieldSizeX, fieldSizeY);
-    //     }
-
-    //     this.dir += Math.sin(x+y+1)*Math.random()*0.3 + Math.cos(x+y+1)*0;
-    // }
 }

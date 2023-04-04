@@ -225,9 +225,9 @@ function dryField()
         // }
         // field[i*3+2] = el;
         if(field[i*3 + 1] != objId.home)
-            field[i*3] *= 0.997;
+            field[i*3] *= 0.998;
         if(field[i*3 + 1] != objId.food)
-            field[i*3+2] *= 0.997;
+            field[i*3+2] *= 0.998;
     }
 }
 
