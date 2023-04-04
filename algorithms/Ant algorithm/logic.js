@@ -231,13 +231,53 @@ function dryField()
     }
 }
 
-function updateGame()
-{
+// function updateGame()
+// {
+//     dryField();
+//     for (let i = 0; i < antCount; i++) {
+//         ants[i].doStep(field, fieldSizeX, fieldSizeY, objId);
+//     }
+// }
+
+function updateGame() {
     dryField();
-    for (let i = 0; i < antCount; i++) {
-        ants[i].doStep(field, fieldSizeX, fieldSizeY, objId);
+  
+    const workers = [];
+    const chunkSize = Math.ceil(ants.length / 6);
+  
+    for (let i = 0; i < 6; i++) {
+      const start = i * chunkSize;
+      const end = start + chunkSize;
+      const chunk = ants.slice(start, end);
+  
+      const worker = new Worker('antWorker.js'); // путь к файлу с кодом Web Worker
+      worker.postMessage({ chunk, field, fieldSizeX, fieldSizeY, objId });
+  
+      worker.onmessage = function (event) {
+        // Обновляем поле после обработки части муравьев
+        console.log("event");
+        const result = event.data;
+        for (let i = 0; i < result.length; i++) {
+          const antIndex = start + i;
+          const ant = result[i];
+          ants[antIndex] = ant;
+          this.terminate();
+        }
+      };
+  
+      workers.push(worker);
     }
-}
+  
+    //Ожидаем завершения работы всех Web Workers
+    // Promise.all(workers.map(w => new Promise(r => w.onmessage = r))).then(() =>{
+        
+    // })
+
+    console.log('end');
+    
+  }
+  
+
 let t0;
 function update()
 {
