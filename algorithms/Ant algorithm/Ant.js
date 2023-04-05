@@ -1,15 +1,15 @@
 let antTarget = {home: 'home', food: 'food'};
-// let sniffRange = 5;
-// let markerIntensity = 100;
-// function transitionProb1(antX, antY, dir, tileX, tileY, marker1, clock)
-// {
-//     let dirVec = {x: Math.cos(dir), y: Math.sin(dir)};
-//     let tileVec = {x: tileX - antX, y: tileY - antY};
-//     let scalar = dirVec.x * tileVec.x + dirVec.y * tileVec.y;
-//     let modul = Math.sqrt(tileVec.x * tileVec.x + tileVec.y * tileVec.y);
-//     let angle = Math.acos(scalar/modul);
-//     return (1 - angle/Math.PI) + marker1/255 * (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;
-// }
+// let sniffRange = 15;
+// let markerIntensity = 255;
+// // function transitionProb1(antX, antY, dir, tileX, tileY, marker1, clock)
+// // {
+// //     let dirVec = {x: Math.cos(dir), y: Math.sin(dir)};
+// //     let tileVec = {x: tileX - antX, y: tileY - antY};
+// //     let scalar = dirVec.x * tileVec.x + dirVec.y * tileVec.y;
+// //     let modul = Math.sqrt(tileVec.x * tileVec.x + tileVec.y * tileVec.y);
+// //     let angle = Math.acos(scalar/modul);
+// //     return (1 - angle/Math.PI) + marker1/255 * Math.random() //* (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;
+// // }
 
 // function angleVectors(x1, y1, x2, y2)
 // {
@@ -31,22 +31,23 @@ let antTarget = {home: 'home', food: 'food'};
 export class Ant{
     constructor(pos)
     {
-        //this.pos = {x:100, y:100};
         this.pos = pos;
         this.speed = 1;
         this.freedom = 0.5 + Math.random()*0.5;
+        this.sniffRange = 15;
+        this.markerIntensity = 255;
         this.target = antTarget.food;
         this.clock = 0;
         this.dir = Math.random() * 2 * Math.PI;
     }
-    // transitionProb = function(tileX, tileY, marker)
+    //transitionProb = function(tileX, tileY, marker)
     // {
     //     let dirVec = {x: Math.cos(this.dir), y: Math.sin(this.dir)};
     //     let tileVec = {x: tileX - Math.ceil(this.pos.x), y: tileY - Math.ceil(this.pos.y)};
     //     let scalar = dirVec.x * tileVec.x + dirVec.y * tileVec.y;
     //     let modul = Math.sqrt(tileVec.x * tileVec.x + tileVec.y * tileVec.y);
     //     let angle = Math.acos(scalar/modul);
-    //     return (1 - angle/Math.PI) + marker/255 * (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;   
+    //     return (1 - angle/Math.PI) + marker/255 * Math.random()*2 //* (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;   
     // }
 
     // doStep = function(field, fieldSizeX, fieldSizeY, objId)
@@ -70,20 +71,14 @@ export class Ant{
 
     //     if(this.target == antTarget.food)
     //     {
-    //         field[(y*fieldSizeX+x)*3] += markerIntensity * (100 / this.clock);
-    //         //field[(y*fieldSizeX+x)*3] += markerIntensity * Math.exp(-0.005 * this.clock);
-    //         //field[(y*fieldSizeX+x)*3] = Math.max(field[(y*fieldSizeX+x)*3], markerIntensity * Math.exp(-0.005 * this.clock));
+    //         field[(y*fieldSizeX+x)*3] = Math.max(field[(y*fieldSizeX+x)*3], markerIntensity * Math.exp(-0.005 * this.clock));
     //         if(field[(y*fieldSizeX+x)*3]>255) field[(y*fieldSizeX+x)*3] = 255;
     //     }
     //     else
     //     {
-    //         field[(y*fieldSizeX+x)*3 + 2] += markerIntensity * (100 / this.clock);
-    //         //field[(y*fieldSizeX+x)*3 + 2] += markerIntensity * Math.exp(-0.005 * this.clock);
-    //         //field[(y*fieldSizeX+x)*3 + 2] = Math.max(field[(y*fieldSizeX+x)*3 + 2], markerIntensity * Math.exp(-0.005 * this.clock));
+    //         field[(y*fieldSizeX+x)*3 + 2] = Math.max(field[(y*fieldSizeX+x)*3 + 2], markerIntensity * Math.exp(-0.005 * this.clock));
     //         if(field[(y*fieldSizeX+x)*3 + 2]>255) field[(y*fieldSizeX+x)*3 + 2] = 255;
     //     }
-
-    //     // this.dir += (Math.random() - 0.5) * Math.PI/8;
 
     //     let maxProb = 0;
     //     let tile;
@@ -92,16 +87,14 @@ export class Ant{
     //             if(i == x && j == y) continue;
     //             if(-1 <= i && i < fieldSizeX+1 && -1 <= j && j < fieldSizeY+1)
     //             {
-    //                 let marker1, marker2;
+    //                 let marker1;
     //                 if(this.target == antTarget.food) 
     //                 {
     //                     marker1 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'b')
-    //                     marker2 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'r')
     //                 }
     //                 else 
     //                 {
     //                     marker1 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'r')
-    //                     marker2 = getMarker(i, j, field, fieldSizeX, fieldSizeY, 'b')
     //                 }
     //                 let prob = this.transitionProb(i, j, marker1);
     //                 if(prob > maxProb)
