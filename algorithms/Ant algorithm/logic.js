@@ -10,16 +10,14 @@ regenButton.addEventListener('click', regenerate);
 
 const inputFieldSize = document.getElementById('inputFieldSize');
 const inputAntCount = document.getElementById('inputAntCount');
-const inputDrySpeed = document.getElementById('inputDrySpeed');
-inputDrySpeed.addEventListener('focusout', function (e) {
-    drySpeed = inputDrySpeed.value;
-})
 
-const inputAntSpeed = document.getElementById('inputAntSpeed');
-inputAntSpeed.addEventListener('focusout', function (e) {
+const inputSimulationSpeed = document.getElementById('inputSimulationSpeed');
+inputSimulationSpeed.addEventListener('focusout', function (e) {
+    simulationSpeed = parseInt(inputSimulationSpeed.value);
     for (let i = 0; i < antCount; i++) {
-        ants[i].speed = inputAntSpeed.value;
+        ants[i].speed = simulationSpeed;
     }
+    drySpeed = Math.pow(0.998, simulationSpeed);
 })
 
 const inputBrushSize = document.getElementById('inputBrushSize');
@@ -44,9 +42,11 @@ let field;
 let fieldSizeX, fieldSizeY;
 let tileSize, tileSizePixels;
 
+let simulationSpeed = 1;
+let drySpeed = 1;
+
 let antCount;
 let ants;
-let drySpeed;
 let isDraw = false;
 
 let brushTypes = { home: 'home', food: "food", obstacle: 'obstacle', homeMarker: 'homeMarker', foodMarker: 'foodMarker' };
@@ -100,7 +100,6 @@ function regenerate() {
     draw({ x: 100, y: 100 }, brushTypes.home, 20);
     draw({ x: 450, y: 200 }, brushTypes.food, 20);
     createAnts();
-    drySpeed = inputDrySpeed.value;
     createAnts();
 }
 regenerate();
@@ -182,14 +181,9 @@ function fieldMouseMove(event) {
 function dryField() {
     for (let i = 0; i < fieldSizeX * fieldSizeY; i++) {
         if (field[i * 3 + 1] != objId.home)
-            field[i * 3] *= 0.998;
+            field[i * 3] *= drySpeed;
         if (field[i * 3 + 1] != objId.food)
-            field[i * 3 + 2] *= 0.998;
-        // if (field[i * 3 + 1] == objId.obstacle || field[(i-1) * 3 + 1] == objId.obstacle || field[(i+1) * 3 + 1] == objId.obstacle)
-        // {
-        //     field[i * 3 + 2] = 0;
-        //     field[i * 3] = 0;
-        // }
+            field[i * 3 + 2] *= drySpeed;
     }
 }
 
@@ -268,7 +262,7 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
         }
     }
 
-    if (marking) {
+    //if (marking) {
         if (ant.target == antTarget.food) {
             field[(y * fieldSizeX + x) * 3] = Math.max(field[(y * fieldSizeX + x) * 3], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
             if (field[(y * fieldSizeX + x) * 3] > 255) field[(y * fieldSizeX + x) * 3] = 255;
@@ -277,7 +271,7 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
             field[(y * fieldSizeX + x) * 3 + 2] = Math.max(field[(y * fieldSizeX + x) * 3 + 2], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
             if (field[(y * fieldSizeX + x) * 3 + 2] > 255) field[(y * fieldSizeX + x) * 3 + 2] = 255;
         }
-    }
+    //}
 
 
 
@@ -315,7 +309,7 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
 
 
 
-    if (0 <= newPosX && newPosX < fieldSizeX - 1 && nexTile != objId.obstacle) {
+    if (0 <= newPosX && newPosX < fieldSizeX - 1 /*&& nexTile != objId.obstacle*/) {
         ant.pos.x = newPosX;
     }
     else {
@@ -325,7 +319,7 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
             ant.dir = Math.acos(-Math.cos(ant.dir));
     }
 
-    if (0 <= newPosY && newPosY < fieldSizeY - 1 && nexTile != objId.obstacle) {
+    if (0 <= newPosY && newPosY < fieldSizeY - 1 /*&& nexTile != objId.obstacle*/) {
         ant.pos.y = newPosY;
     }
     else {
