@@ -8,6 +8,22 @@ canvas.addEventListener('mouseup', function () { isDraw = false; });
 const regenButton = document.getElementById("regenButton");
 regenButton.addEventListener('click', regenerate);
 
+const startButton = document.getElementById("startButton");
+startButton.addEventListener('click', function () {
+    if (simulationSpeed != 0) {
+        previusSumilationSpeed = simulationSpeed;
+        simulationSpeed = 0;
+    }
+    else {
+        simulationSpeed = previusSumilationSpeed;
+    }
+    if (firstTimeAfterGeneration) {
+        regenerate();
+        simulationSpeed = parseInt(inputSimulationSpeed.value);
+    }
+
+});
+
 const inputFieldSize = document.getElementById('inputFieldSize');
 const inputAntCount = document.getElementById('inputAntCount');
 
@@ -42,7 +58,9 @@ let field;
 let fieldSizeX, fieldSizeY;
 let tileSize, tileSizePixels;
 
-let simulationSpeed = 1;
+let simulationSpeed = 0;
+let firstTimeAfterGeneration = true;
+let previusSumilationSpeed = simulationSpeed;
 let drySpeed = 1;
 
 let antCount;
@@ -96,13 +114,12 @@ function createField() {
 }
 
 function regenerate() {
+    firstTimeAfterGeneration = false;
     createField();
     draw({ x: 100, y: 100 }, brushTypes.home, 20);
     draw({ x: 450, y: 200 }, brushTypes.food, 20);
     createAnts();
-    createAnts();
 }
-regenerate();
 
 function createAnts() {
     antCount = parseInt(inputAntCount.value);
@@ -127,7 +144,6 @@ function getFieldXY(event) {
     y = parseInt(y / tileSizePixels);
     return { x: x, y: y };
 }
-
 
 function fieldMauseDown(event) {
     let pos = getFieldXY(event);
@@ -188,52 +204,28 @@ function dryField() {
 }
 
 function updateGame() {
-    let t0 = performance.now();
 
     dryField();
-    let t1 = performance.now();
-    //console.log(t1 - t0);
-
     for (let i = 0; i < antCount; i++) {
         updateAnt(ants[i], field, fieldSizeX, fieldSizeY, objId);
-        //updateAntsAsync(ants, field, fieldSizeX, fieldSizeY, objId)
 
     }
 }
 
-
-
-let t0;
 function update() {
-    t0 = performance.now();
-    updateGame();
-
     gl.clear(gl.COLOR_BUFFER_BIT);
-    drawField(gl, programField, field, fieldSizeX, fieldSizeY);
-    for (let i = 0; i < antCount; i++) {
-        drawAnt(gl, programAnt, ratio, tileSize, ants[i], antsColors);
+    if (!firstTimeAfterGeneration) {
+        if (simulationSpeed > 0)
+            updateGame();
+        drawField(gl, programField, field, fieldSizeX, fieldSizeY);
+        for (let i = 0; i < antCount; i++) {
+            drawAnt(gl, programAnt, ratio, tileSize, ants[i], antsColors);
+        }
     }
-    let t1 = performance.now();
-    //console.log(t1-t0);
+    console.log(simulationSpeed)
     requestAnimationFrame(update);
 }
 update();
-
-
-
-async function updateAntsAsync(ants, field, fieldSizeX, fieldSizeY, objId) {
-    let promises = new Array(ants.length);
-    for (let i = 0; i < promises.length; i++) {
-        promises[i] = new Promise((resolve, reject) => {
-            updateAnt(ants[i], field, fieldSizeX, fieldSizeY, objId)
-            resolve();
-        });
-    }
-
-    var l = await Promise.all(promises);
-    //updateAntsAsync(ants, field, fieldSizeX, fieldSizeY, objId);
-}
-
 
 function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
     let x = Math.ceil(ant.pos.x)
@@ -251,29 +243,14 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
         ant.clock = 0;
     }
 
-    let obstacleDist = 2;
-    let marking = true;
-    for (let i = x - obstacleDist; i <= x + obstacleDist; i++) {
-        for (let j = y - obstacleDist; j <= y + obstacleDist; j++) {
-            if (field[(j * fieldSizeX + i) * 3 + 1] == objId.obstacle) {
-                marking = false;
-                break;
-            }
-        }
+    if (ant.target == antTarget.food) {
+        field[(y * fieldSizeX + x) * 3] = Math.max(field[(y * fieldSizeX + x) * 3], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
+        if (field[(y * fieldSizeX + x) * 3] > 255) field[(y * fieldSizeX + x) * 3] = 255;
     }
-
-    //if (marking) {
-        if (ant.target == antTarget.food) {
-            field[(y * fieldSizeX + x) * 3] = Math.max(field[(y * fieldSizeX + x) * 3], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
-            if (field[(y * fieldSizeX + x) * 3] > 255) field[(y * fieldSizeX + x) * 3] = 255;
-        }
-        else {
-            field[(y * fieldSizeX + x) * 3 + 2] = Math.max(field[(y * fieldSizeX + x) * 3 + 2], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
-            if (field[(y * fieldSizeX + x) * 3 + 2] > 255) field[(y * fieldSizeX + x) * 3 + 2] = 255;
-        }
-    //}
-
-
+    else {
+        field[(y * fieldSizeX + x) * 3 + 2] = Math.max(field[(y * fieldSizeX + x) * 3 + 2], ant.markerIntensity * Math.exp(-0.005 * ant.clock));
+        if (field[(y * fieldSizeX + x) * 3 + 2] > 255) field[(y * fieldSizeX + x) * 3 + 2] = 255;
+    }
 
     let maxProb = 0;
     let tile;
@@ -304,12 +281,8 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
     let newPosX = ant.pos.x + Math.cos(ant.dir) * ant.speed;
     let newPosY = ant.pos.y + Math.sin(ant.dir) * ant.speed;
 
-    let nexTile = field[(parseInt(newPosY) * fieldSizeX + parseInt(newPosX)) * 3 + 1];
 
-
-
-
-    if (0 <= newPosX && newPosX < fieldSizeX - 1 /*&& nexTile != objId.obstacle*/) {
+    if (0 <= newPosX && newPosX < fieldSizeX - 1) {
         ant.pos.x = newPosX;
     }
     else {
@@ -319,7 +292,7 @@ function updateAnt(ant, field, fieldSizeX, fieldSizeY, objId) {
             ant.dir = Math.acos(-Math.cos(ant.dir));
     }
 
-    if (0 <= newPosY && newPosY < fieldSizeY - 1 /*&& nexTile != objId.obstacle*/) {
+    if (0 <= newPosY && newPosY < fieldSizeY - 1) {
         ant.pos.y = newPosY;
     }
     else {
@@ -335,7 +308,7 @@ function transitionProb1(antX, antY, dir, tileX, tileY, marker1, obstacle) {
     let scalar = dirVec.x * tileVec.x + dirVec.y * tileVec.y;
     let modul = Math.sqrt(tileVec.x * tileVec.x + tileVec.y * tileVec.y);
     let angle = Math.acos(scalar / modul);
-    return ((1 - angle / Math.PI) + marker1 / 255 * Math.random() * 2) * obstacle; //* (Math.random()*1.7 - 0.7) //* (1-Math.exp(-0.05*clock))  //- marker2/255*0.5;
+    return ((1 - angle / Math.PI) + marker1 / 255 * Math.random() * 2) * obstacle;
 }
 
 function angleVectors(x1, y1, x2, y2) {
@@ -353,9 +326,8 @@ function getMarker(x, y, field, fieldSizeX, fieldSizeY, color) {
     else return field[(y * fieldSizeX + x) * 3 + 2];
 }
 
-function getObstacle(x, y, field, fieldSizeX, fieldSizeY)
-{
+function getObstacle(x, y, field, fieldSizeX, fieldSizeY) {
     if (x < 0 || x >= fieldSizeX || y < 0 || y >= fieldSizeY) return 0.0001;
-    if(field[(y * fieldSizeX + x) * 3 + 1] == objId.obstacle) return 0.0001;
+    if (field[(y * fieldSizeX + x) * 3 + 1] == objId.obstacle) return 0.0001;
     else return 1;
 }
