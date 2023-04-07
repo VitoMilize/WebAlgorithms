@@ -18,8 +18,9 @@ startButton.addEventListener('click', function () {
         simulationSpeed = previusSumilationSpeed;
     }
     if (firstTimeAfterGeneration) {
-        regenerate();
         simulationSpeed = parseInt(inputSimulationSpeed.value);
+        firstTimeAfterGeneration = false;
+        createAnts();
     }
 
 });
@@ -67,7 +68,7 @@ let antCount;
 let ants;
 let isDraw = false;
 
-let brushTypes = { home: 'home', food: "food", obstacle: 'obstacle', homeMarker: 'homeMarker', foodMarker: 'foodMarker' };
+let brushTypes = { home: 'home', food: "food", obstacle: 'obstacle', homeMarker: 'homeMarker', foodMarker: 'foodMarker', erase: "erase" };
 let brush = selectBrush.value;
 let brushSize = parseInt(inputBrushSize.value);
 
@@ -112,28 +113,39 @@ function createField() {
     initProgramField(gl, programField, width, height, fieldColors, objId);
     initProgramAnt(gl, programAnt, width, height);
 }
+createField();
 
 function regenerate() {
-    firstTimeAfterGeneration = false;
+    firstTimeAfterGeneration = true;
     createField();
-    draw({ x: 100, y: 100 }, brushTypes.home, 20);
-    draw({ x: 450, y: 200 }, brushTypes.food, 20);
-    createAnts();
 }
 
 function createAnts() {
     antCount = parseInt(inputAntCount.value);
     ants = new Array(antCount);
-    let positions = [];
+    let positionsX = new Array();
+    let positionsY = new Array();
+
     for (let i = 0; i < fieldSizeX; i++) {
         for (let j = 0; j < fieldSizeY; j++) {
             if (field[(j * fieldSizeX + i) * 3 + 1] == objId.home) {
-                positions.push({ x: i, y: j });
+                positionsX.push(i);
+                positionsY.push(j);
             }
         }
     }
-    for (let i = 0; i < antCount; i++) {
-        ants[i] = new Ant({ x: 100, y: 100 });
+    if(positionsX.length != 0)
+    {
+        for (let i = 0; i < antCount; i++) {
+            let index = parseInt(Math.random() * (positionsX.length - 1));
+            ants[i] = new Ant(positionsX[index], positionsY[index]);
+        }
+    }
+    else
+    {
+        alert("home not found");
+        simulationSpeed = 0;
+        firstTimeAfterGeneration = true;
     }
 }
 
@@ -179,6 +191,11 @@ function draw(pos, brush, size) {
                     case brushTypes.foodMarker:
                         field[(j * fieldSizeX + i) * 3 + 2] = 255;
                         break;
+                    case brushTypes.erase:
+                        field[(j * fieldSizeX + i) * 3 + 0] = 0;
+                        field[(j * fieldSizeX + i) * 3 + 1] = 0;
+                        field[(j * fieldSizeX + i) * 3 + 2] = 0;
+                        break;
                     default:
                         break;
                 }
@@ -204,25 +221,23 @@ function dryField() {
 }
 
 function updateGame() {
-
     dryField();
     for (let i = 0; i < antCount; i++) {
         updateAnt(ants[i], field, fieldSizeX, fieldSizeY, objId);
-
     }
 }
 
 function update() {
     gl.clear(gl.COLOR_BUFFER_BIT);
+    drawField(gl, programField, field, fieldSizeX, fieldSizeY);
+
     if (!firstTimeAfterGeneration) {
         if (simulationSpeed > 0)
             updateGame();
-        drawField(gl, programField, field, fieldSizeX, fieldSizeY);
-        for (let i = 0; i < antCount; i++) {
-            drawAnt(gl, programAnt, ratio, tileSize, ants[i], antsColors);
+            for (let i = 0; i < antCount; i++) {
+                drawAnt(gl, programAnt, ratio, tileSize, ants[i], antsColors);
         }
     }
-    console.log(simulationSpeed)
     requestAnimationFrame(update);
 }
 update();
