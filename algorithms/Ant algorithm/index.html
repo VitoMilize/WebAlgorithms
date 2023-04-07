@@ -3,10 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./styles.css">
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+      integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+      crossorigin="anonymous"
+      defer></script>
+
     <title>Ant Algorithm</title>
 </head>
 <body>
-    
-    <script src="./logic.js"></script>
+    <div class="container">
+      <div class="menu">
+        
+        <label for="inputFieldSize">Field size:</label>
+        <input class="inputField" id="inputFieldSize" type="number" value="1000"/>
+
+        <label for="inputAntCount">Ant count:</label>
+        <input class="inputField" id="inputAntCount" type="number" value="300"/>
+        <button id="regenButton">Regenerate</button>
+        <button id="startButton">Start/stop</button>
+
+        <label for="inputSimulationSpeed">Simulation speed:</label>
+        <input class="inputField" id="inputSimulationSpeed" type="number" min="1" value="1"/>
+        
+        <label for="selectBrush">Brush: </label>
+        <select id="selectBrush">
+          <option value="home">home</option>
+          <option value="food">food</option>
+          <option value="obstacle">obstacle</option>
+          <option value="erase">erase</option>
+          <option value="foodMarker">food marker</option>
+          <option value="homeMarker">home marker</option>
+        </select>
+        <label for="inputBrushSize">Brush size:</label>
+        <input class="inputField" id="inputBrushSize" type="number" value="20"/>
+      </div>
+
+      <canvas class="canvas" height="50px" width="1700px"></canvas>
+    </div>
+      
+    <script type="module" src="./Ant.js"></script>
+    <script type="module" src="./WebGLFunctions.js"></script>
+    <script type="module" src="./logic.js"></script>
 </body>
 </html>

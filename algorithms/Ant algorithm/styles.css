@@ -1,0 +1,27 @@
+.container{
+    width:95%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-content: center;
+    text-align: center;
+    margin: 0px;
+}
+/* .menu{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    align-content: center;
+    text-align: center;
+} */
+.canvas{
+    position: fixed;
+    display: block;
+    top: 5vh;
+    left: 0;
+    width: 100vw;
+    height: 94vh;
+}
+.inputField{
+    width: 50px;
+}
