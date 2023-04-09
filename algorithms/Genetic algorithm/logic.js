@@ -1,6 +1,6 @@
 let map;
 let context;
-let button;
+let buttonStart;
 let points = [];
 let adjacencyMatrix = [];
 let amountOfCity;
@@ -52,12 +52,13 @@ function handleClick(event) {
 }
 
 function initButtonStart() {
-    button = document.getElementById("buttonStart");
-    button.width = button.offsetWidth;
-    button.height = button.offsetHeight;
-    button.textContent = "Запуск";
-    button.addEventListener("click", resultClick);
+    buttonStart = document.getElementById("buttonStart");
+    buttonStart.width = buttonStart.offsetWidth;
+    buttonStart.height = buttonStart.offsetHeight;
+    buttonStart.textContent = "Запуск";
+    buttonStart.addEventListener("click", resultClick);
 }
+
 function resultClick() {
     amountOfCity = points.length;
     amountOfGenerations = inputAmountOfGenerations.value === "" ? 500 : inputAmountOfGenerations.value;
