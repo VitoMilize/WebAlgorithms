@@ -289,23 +289,19 @@ function editMap() {
         }
         else if (map[i][j] == 0 && create == 2) {
           map[i][j] = 2;
+          map[beginX][beginY] = 0;
+          $(`#${beginX}_${beginY}`).css('background-color', 'rgb(255, 255, 255)');
           beginX = i;
           beginY = j;
           cells[j].style.background = "rgb(0, 255, 0)";
         }
-        else if (map[i][j] == 2 && create == 2) {
-          map[i][j] = 0;
-          cells[j].style.background = "rgb(255, 255, 255)";
-        }
         else if (map[i][j] == 0 && create == 3) {
           map[i][j] = 3;
+          map[endX][endY] = 0;
+          $(`#${endX}_${endY}`).css('background-color', 'rgb(255, 255, 255)');
           endX = i;
           endY = j;
           cells[j].style.background = "rgb(255, 0, 0)";
-        }
-        else if (map[i][j] == 3 && create == 3) {
-          map[i][j] = 0;
-          cells[j].style.background = "rgb(255, 255, 255)";
         }
       });
     }

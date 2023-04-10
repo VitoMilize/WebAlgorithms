@@ -1,12 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="./styles.css">
-    <title>main</title>
+  <title>CSV to Tree</title>
 </head>
+
 <body>
-    
-    <script src="./logic.js"></script>
+  <label for="csvInput">Paste CSV:</label><br>
+  <textarea id="csvInput"></textarea><br>
+  <button id="buildTreeBtn">Build Tree</button><br>
+  <label for="searchInput">Search:</label><br>
+  <input type="text" id="searchInput"><br>
+  <button id="searchBtn">Search</button><br>
+  <div id="tree"></div>
+
+  <script src="./logic.js"></script>
 </body>
+
 </html>
