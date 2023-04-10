@@ -1,11 +1,11 @@
-let csvData;
+let dataset;
 
-function loadData() {
+function loadDataset() {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
-                csvData = xhr.responseText;
+                dataset = xhr.responseText;
                 resolve();
             }
         };
@@ -14,7 +14,7 @@ function loadData() {
     });
 }
 
-loadData()
+loadDataset()
     .then(() => {
         lern();
     })
@@ -23,6 +23,6 @@ loadData()
     });
 
 function lern() {
-    const rows = csvData.split('\n');
+    const rows = dataset.split('\n');
     console.log(rows[1]);
 }
