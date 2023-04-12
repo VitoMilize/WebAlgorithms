@@ -19,6 +19,11 @@ MatrixXd readMatrix(string path)
 {
 	int rows, cols;
 	ifstream ifs(path, ios::binary);
+	if (ifs.fail())
+	{
+		cout << "weights not found" << endl;
+		return MatrixXd();
+	}
 	ifs.read((char*)&rows, sizeof(int));
 	ifs.read((char*)&cols, sizeof(int));
 	MatrixXd m(rows, cols);
