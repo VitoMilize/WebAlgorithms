@@ -47,10 +47,6 @@ function handleClick(event) {
 
 function resultClick() {
     clustersAmount = inputClustersAmount.value;
-    if (inputClustersAmount.value > points.length) {
-        inputClustersAmount.value = points.length;
-        clustersAmount = inputClustersAmount.value;
-    }
     let centroids = kMeansClustering(points, clustersAmount);
 
     context.clearRect(0, 0, map.width, map.height);
