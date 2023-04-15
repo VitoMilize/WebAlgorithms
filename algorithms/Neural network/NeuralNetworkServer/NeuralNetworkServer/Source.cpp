@@ -5,10 +5,13 @@
 #include <math.h>
 #include <filesystem>
 #include <rapidcsv.h>
+#include <csignal>
 #include"Functions.h"
 #include <omp.h>
 using namespace std;
 using Eigen::MatrixXd;
+
+volatile sig_atomic_t endSignal;
 
 int inputSize = 28 * 28;
 vector<int> layers = { inputSize, 32, 16, 10 };
@@ -17,6 +20,11 @@ vector<MatrixXd> neuronInputs(layers.size());
 vector<MatrixXd> neuronOutputs(layers.size());
 vector<MatrixXd> neuronErrors(layers.size());
 vector<MatrixXd> neuronErrorsMultWeights(layers.size());
+
+void signalHendler(int signal)
+{
+	endSignal = signal;
+}
 
 double sigmoid(double x)
 {
@@ -92,6 +100,10 @@ void saveWeights(vector<MatrixXd>& weightMatrixes)
 		}
 	}
 	filesystem::path pathToLastWeightsDir = pathToWeightsDir.string() + "//" + to_string(lastWeights) + "//";
+	for (int i = 1; i < weightMatrixes.size(); i++)
+	{
+		saveMatrix(weightMatrixes[i], pathToLastWeightsDir.string() + to_string(i - 1) + "-" + to_string(i) + ".bin");
+	}
 }
 
 void directPassage(MatrixXd inputMatrix)
@@ -108,7 +120,7 @@ void directPassage(MatrixXd inputMatrix)
 	}
 }
 
-void lern(MatrixXd inputMatrix, MatrixXd rightAnswers)
+void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 {
 	for (int i = layers.size() - 1; i > 0; i--)
 	{
@@ -160,69 +172,69 @@ void lern(MatrixXd inputMatrix, MatrixXd rightAnswers)
 	directPassage(inputMatrix);
 }
 
-void readDataset(rapidcsv::Document& doc, MatrixXd& inputMatrix, MatrixXd& rightAnswers)
+void readDataset(rapidcsv::Document& doc, MatrixXd& inputMatrix, MatrixXd& rightAnswers, int i)
 {
-
+	vector<double> row = doc.GetRow<double>(i);
+	for (int j = 0; j < rightAnswers.rows(); j++)
+	{
+		rightAnswers(j, 0) = 0;
+		if (j == row[0])
+		{
+			rightAnswers(j, 0) = 1;
+		}
+	}
+	for (int j = 1; j < row.size(); j++)
+	{
+		inputMatrix(j-1, 0) = row[j];
+	}
 }
 
 int main()
 {
-	rapidcsv::Document doc("./dataset//mnist_train.csv");
-	for (int f = 0; f < 50; f++)
-	{
-		vector<double> row = doc.GetRow<double>(f);
-		cout << row[0] << endl;
-		for (int i = 1; i < row.size(); i++)
-		{
-			if (row[i] != 0)
-			{
-				cout << "1 ";
-			}
-			else
-			{
-				cout << "0 ";
-			}
-			if ((i) % 28 == 0)
-			{
-				cout << endl;
-			}
-		}
-		cout << endl;
-	}
-	
+	signal(SIGINT, signalHendler);
+
+	rapidcsv::Document trainDoc("./dataset//mnist_train.csv");
+	rapidcsv::Document testDoc("./dataset//mnist_test.csv");
+	MatrixXd inputMatrix(inputSize, 1);
+	MatrixXd rightAnswers(layers[layers.size() - 1], 1);
+	readDataset(trainDoc, inputMatrix, rightAnswers, 0);
 
 	//createNewWeights(layers);
 
-	//readWeights(weightMatrixes);
+	readWeights(weightMatrixes);
 
-	//
+	directPassage(inputMatrix);
 
-	//MatrixXd inputMatrix(inputSize, 1);
-	//for (int i = 0; i < inputSize; i++)
-	//{
-	//	inputMatrix(i, 0) = 1;
-	//}
+	for (int i = 0; i < layers.size(); i++)
+	{
+		neuronErrors[i] = MatrixXd::Ones(layers[i], 1);
+	}
 
-	//MatrixXd rightAnswers(layers[layers.size() - 1], 1);
-	//for (int i = 0; i < rightAnswers.size(); i++)
-	//{
-	//	rightAnswers(i, 0) = 1;
-	//}
+	int k = 1;
+	while (endSignal == 0)
+	{
+		for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
+		{
+			readDataset(trainDoc, inputMatrix, rightAnswers, i);
+			train(inputMatrix, rightAnswers);
+			if (i % 10000 == 0)
+			{
+				saveWeights(weightMatrixes);
+			}
+		}
+		readDataset(testDoc, inputMatrix, rightAnswers, k % testDoc.GetRowCount());
+		directPassage(inputMatrix);
+		/*cout << rightAnswers << endl << endl;
+		cout << neuronOutputs[neuronOutputs.size() - 1];*/
+		double error = 0;
+		for (int i = 0; i < rightAnswers.rows(); i++)
+		{
+			error += abs(rightAnswers(i, 0) - neuronOutputs[neuronOutputs.size() - 1](i, 0));
+		}
+		cout << "epoch: " << k << "\t" << "error :" << error << endl;
+		k++;
+	}
 
-	//directPassage(inputMatrix);
-
-	//for (int i = 0; i < layers.size(); i++)
-	//{
-	//	neuronErrors[i] = MatrixXd::Ones(layers[i], 1);
-	//}
-
-
-	//for (int k = 0; k < 1000000; k++)
-	//{
-	//	lern(inputMatrix, rightAnswers);
-	//	if (k % 10000 == 0)
-	//		cout << neuronOutputs[neuronOutputs.size() - 1] << endl << endl;
-	//}
 
 	std::system("pause");
 }
