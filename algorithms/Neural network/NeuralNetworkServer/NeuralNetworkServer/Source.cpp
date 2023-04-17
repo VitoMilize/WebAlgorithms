@@ -14,7 +14,7 @@ using Eigen::MatrixXd;
 volatile sig_atomic_t endSignal;
 
 int inputSize = 28 * 28;
-vector<int> layers = { inputSize, 32, 16, 10 };
+vector<int> layers = { inputSize, 256, 128, 10 };
 vector<MatrixXd> weightMatrixes(layers.size());
 vector<MatrixXd> neuronInputs(layers.size());
 vector<MatrixXd> neuronOutputs(layers.size());
@@ -120,6 +120,8 @@ void directPassage(MatrixXd inputMatrix)
 	}
 }
 
+double lerningRate = 0.1;
+
 void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 {
 	for (int i = layers.size() - 1; i > 0; i--)
@@ -155,7 +157,7 @@ void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 			for (int w = 0; w < weightMatrixes[i].cols(); w++)
 			{
 				//cout << "\t\t pre neuron output" << w << ": " << neuronOutputs[i - 1](w, 0);
-				double Dw = error * neuronOutputs[i - 1](w, 0);
+				double Dw = error * neuronOutputs[i - 1](w, 0) * lerningRate;
 				//cout << "\t\t Dw" << w << ": " << Dw << endl;
 				weightMatrixes[i](j, w) += Dw;
 			}
@@ -215,14 +217,14 @@ int main()
 	{
 		for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
 		{
-			readDataset(trainDoc, inputMatrix, rightAnswers, i);
+			readDataset(trainDoc, inputMatrix, rightAnswers, 0);
 			train(inputMatrix, rightAnswers);
 			if (i % 10000 == 0)
 			{
 				saveWeights(weightMatrixes);
 			}
 		}
-		readDataset(testDoc, inputMatrix, rightAnswers, k % testDoc.GetRowCount());
+		readDataset(trainDoc, inputMatrix, rightAnswers, 0);
 		directPassage(inputMatrix);
 		/*cout << rightAnswers << endl << endl;
 		cout << neuronOutputs[neuronOutputs.size() - 1];*/
@@ -234,7 +236,6 @@ int main()
 		cout << "epoch: " << k << "\t" << "error :" << error << endl;
 		k++;
 	}
-
 
 	std::system("pause");
 }
