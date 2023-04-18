@@ -13,8 +13,8 @@ using Eigen::MatrixXd;
 
 volatile sig_atomic_t endSignal;
 
-int inputSize = 28 * 28;
-vector<int> layers = { inputSize, 256, 128, 10 };
+int inputSize = 28*28;
+vector<int> layers = { inputSize, 512, 10 };
 vector<MatrixXd> weightMatrixes(layers.size());
 vector<MatrixXd> neuronInputs(layers.size());
 vector<MatrixXd> neuronOutputs(layers.size());
@@ -124,6 +124,8 @@ double lerningRate = 0.1;
 
 void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 {
+	directPassage(inputMatrix);
+
 	for (int i = layers.size() - 1; i > 0; i--)
 	{
 		//cout << "layer: " << i << endl;
@@ -136,7 +138,7 @@ void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 			double error;
 			if (i == layers.size() - 1)
 			{
-				error = -2 * (neuronOutputs[i](j, 0) - rightAnswers(j, 0)) * sigmoidD(neuronInputs[i](j, 0));
+				error = (neuronOutputs[i](j, 0) - rightAnswers(j, 0)) * sigmoidD(neuronInputs[i](j, 0));
 				//error = -2 * (neuronOutputs[i](j, 0) - rightAnswers(j, 0)) * sigmoidD(neuronSums[i](j, 0));
 				/*cout << "\t\t neuron output: " << neuronOutputs[i](j, 0) << endl;
 				cout << "\t\t right answer: " << rightAnswers(j, 0) << endl;
@@ -159,7 +161,7 @@ void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 				//cout << "\t\t pre neuron output" << w << ": " << neuronOutputs[i - 1](w, 0);
 				double Dw = error * neuronOutputs[i - 1](w, 0) * lerningRate;
 				//cout << "\t\t Dw" << w << ": " << Dw << endl;
-				weightMatrixes[i](j, w) += Dw;
+				weightMatrixes[i](j, w) -= Dw;
 			}
 		}
 		//cout << neuronErrors[i] << endl << endl;
@@ -167,11 +169,10 @@ void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 		//cout << neuronErrorsMultWeights[i] << endl << endl;
 
 		//neuronErrorsMultWeights[i] = weightMatrixes[i].transpose() * neuronErrors[i];
-		neuronErrorsMultWeights[i] = oldWeights.transpose() * neuronErrors[i];
+		neuronErrorsMultWeights[i] = oldWeights.transpose() * neuronErrors[i]; // есть ли взвешенная сумма???
 
 		//cout << weightMatrixes[i] << endl << endl;
 	}
-	directPassage(inputMatrix);
 }
 
 void readDataset(rapidcsv::Document& doc, MatrixXd& inputMatrix, MatrixXd& rightAnswers, int i)
@@ -187,8 +188,67 @@ void readDataset(rapidcsv::Document& doc, MatrixXd& inputMatrix, MatrixXd& right
 	}
 	for (int j = 1; j < row.size(); j++)
 	{
-		inputMatrix(j-1, 0) = row[j];
+		inputMatrix(j - 1, 0) = row[j];
 	}
+}
+
+void testModel(rapidcsv::Document& doc)
+{
+	MatrixXd inputMatrix(inputSize, 1);
+	MatrixXd rightAnswers(layers[layers.size() - 1], 1);
+
+	vector<double>numberAccuracy(10);
+	vector<double>allNumber(10);
+
+	double totalAccuracy = 0;
+	double totalNumbers = 0;
+
+	for (int i = 0; i < doc.GetRowCount(); i++)
+	{
+		readDataset(doc, inputMatrix, rightAnswers, i);
+		directPassage(inputMatrix);
+
+		int rightNumber;
+		for (int j = 0; j < rightAnswers.rows(); j++)
+		{
+			if (rightAnswers(j, 0) == 1)
+			{
+				rightNumber = j;
+				break;
+			}
+		}
+		allNumber[rightNumber]++;
+		totalNumbers++;
+
+		double maxAns = 0;
+		int numberAns;
+		for (int j = 0; j < neuronOutputs[neuronOutputs.size() - 1].rows(); j++)
+		{
+			if (neuronOutputs[neuronOutputs.size() - 1](j, 0) > maxAns)
+			{
+				maxAns = neuronOutputs[neuronOutputs.size() - 1](j, 0);
+				numberAns = j;
+			}
+		}
+		
+		if (numberAns == rightNumber)
+		{
+			numberAccuracy[rightNumber]++;
+			totalAccuracy++;
+		}
+	}
+
+	for (int i = 0; i < numberAccuracy.size(); i++)
+	{
+		numberAccuracy[i] /= allNumber[i];
+	}
+	cout << "\tAccuracy: " << endl;
+	for (int i = 0; i < numberAccuracy.size(); i++)
+	{
+		cout << "\t" << i << ": " << numberAccuracy[i] << endl;
+	}
+	cout << "\ttotal: " << totalAccuracy / totalNumbers << endl;
+	cout << endl;
 }
 
 int main()
@@ -212,29 +272,89 @@ int main()
 		neuronErrors[i] = MatrixXd::Ones(layers[i], 1);
 	}
 
-	int k = 1;
+	size_t k = 0;
 	while (endSignal == 0)
 	{
+		k++;
+
+		/*for (int j = 0; j < rightAnswers.rows(); j++)
+		{
+			rightAnswers(j, 0) = 0;
+			if (j == k % 10)
+			{
+				rightAnswers(j, 0) = 1;
+			}
+		}
+		for (int j = 0; j < inputMatrix.rows(); j++)
+		{
+			inputMatrix(j, 0) = 0;
+			if (j == k % 10)
+			{
+				inputMatrix(j, 0) = 1;
+			}
+		}*/
+		/*train(inputMatrix, rightAnswers);
+		saveWeights(weightMatrixes);*/
+
+		/*directPassage(inputMatrix);
+		cout << rightAnswers << endl << endl;
+		cout << neuronOutputs[neuronOutputs.size() - 1] << endl;*/
+
+		cout << "epoch: " << k << endl;
+
+		testModel(testDoc);
+
 		for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
 		{
-			readDataset(trainDoc, inputMatrix, rightAnswers, 0);
+			readDataset(trainDoc, inputMatrix, rightAnswers, i);
+			/*vector<double> row = trainDoc.GetRow<double>(i);
+			if (row[0] != 5.0 && row[0] != 0.0) continue;
+			for (int j = 0; j < rightAnswers.rows(); j++)
+			{
+				rightAnswers(j, 0) = 0;
+				if (j == row[0])
+				{
+					rightAnswers(j, 0) = 1;
+				}
+			}
+			for (int j = 1; j < row.size(); j++)
+			{
+				inputMatrix(j - 1, 0) = row[j];
+			}*/
 			train(inputMatrix, rightAnswers);
 			if (i % 10000 == 0)
 			{
 				saveWeights(weightMatrixes);
 			}
 		}
-		readDataset(trainDoc, inputMatrix, rightAnswers, 0);
-		directPassage(inputMatrix);
-		/*cout << rightAnswers << endl << endl;
-		cout << neuronOutputs[neuronOutputs.size() - 1];*/
+		//saveWeights(weightMatrixes);
+
+		//readDataset(testDoc, inputMatrix, rightAnswers, k);
+
+		/*vector<double> row = testDoc.GetRow<double>(k);
+		if (row[0] != 7) continue;
+		for (int j = 0; j < rightAnswers.rows(); j++)
+		{
+			rightAnswers(j, 0) = 0;
+			if (j == row[0])
+			{
+				rightAnswers(j, 0) = 1;
+			}
+		}
+		for (int j = 1; j < row.size(); j++)
+		{
+			inputMatrix(j - 1, 0) = row[j];
+		}*/
+
+		/*directPassage(inputMatrix);
+		cout << rightAnswers << endl << endl;
+		cout << neuronOutputs[neuronOutputs.size() - 1] << endl;
+
 		double error = 0;
 		for (int i = 0; i < rightAnswers.rows(); i++)
 		{
 			error += abs(rightAnswers(i, 0) - neuronOutputs[neuronOutputs.size() - 1](i, 0));
-		}
-		cout << "epoch: " << k << "\t" << "error :" << error << endl;
-		k++;
+		}*/
 	}
 
 	std::system("pause");
