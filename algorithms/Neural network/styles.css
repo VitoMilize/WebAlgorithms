@@ -1,0 +1,12 @@
+.container{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-content: center;
+    text-align: center;
+    margin: 0px;
+}
+.field{
+    display: inline-block;
+
+}
