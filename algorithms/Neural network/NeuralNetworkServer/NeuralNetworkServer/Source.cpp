@@ -14,7 +14,7 @@ using Eigen::MatrixXd;
 volatile sig_atomic_t endSignal;
 
 int inputSize = 28*28;
-vector<int> layers = { inputSize, 512, 10 };
+vector<int> layers = { inputSize, 512, 128, 10 };
 vector<MatrixXd> weightMatrixes(layers.size());
 vector<MatrixXd> neuronInputs(layers.size());
 vector<MatrixXd> neuronOutputs(layers.size());
@@ -120,7 +120,7 @@ void directPassage(MatrixXd inputMatrix)
 	}
 }
 
-double lerningRate = 0.1;
+double lerningRate = 0.001;
 
 void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 {
