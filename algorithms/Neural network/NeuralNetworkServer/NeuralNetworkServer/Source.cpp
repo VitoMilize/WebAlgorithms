@@ -8,8 +8,10 @@
 #include <csignal>
 #include"Functions.h"
 #include <omp.h>
+#include <nlohmann/json.hpp>
 using namespace std;
 using Eigen::MatrixXd;
+using json = nlohmann::json;
 
 volatile sig_atomic_t endSignal;
 
@@ -111,10 +113,7 @@ void directPassage(MatrixXd inputMatrix)
 	neuronOutputs[0] = inputMatrix;
 	for (int i = 1; i < layers.size(); i++)
 	{
-		//cout << "neuronOutputs" << i - 1 << ":" << endl << neuronOutputs[i - 1] << endl << endl;
 		neuronInputs[i] = weightMatrixes[i] * neuronOutputs[i - 1];
-		//cout << "weights" << i - 1 << "-" << i << ":" << endl << weightMatrixes[i] << endl << endl;
-		//cout << "neuronSums" << i << ":" << endl << neuronSums[i] << endl << endl;
 		neuronOutputs[i] = neuronInputs[i];
 		applyFunctionToMatrix(neuronOutputs[i], sigmoid);
 	}
@@ -251,6 +250,29 @@ void testModel(rapidcsv::Document& doc)
 	cout << endl;
 }
 
+void convertWeightsToJson()
+{
+	for (int k = 1; k < weightMatrixes.size(); k++)
+	{
+		json js;
+		js = json::array();
+
+		for (int i = 0; i < weightMatrixes[k].rows(); i++)
+		{
+			js[i] = json::array();
+
+			for (int j = 0; j < weightMatrixes[k].cols(); j++)
+			{
+				js[i].push_back(weightMatrixes[k](i, j));
+			}
+		}
+
+		std::ofstream outfile("../../weights/" + to_string(k-1) + "-" + to_string(k) + ".json");
+		outfile << js;
+		outfile.close();
+	}
+}
+
 int main()
 {
 	signal(SIGINT, signalHendler);
@@ -264,6 +286,8 @@ int main()
 	//createNewWeights(layers);
 
 	readWeights(weightMatrixes);
+	convertWeightsToJson();
+
 
 	directPassage(inputMatrix);
 
@@ -273,88 +297,23 @@ int main()
 	}
 
 	size_t k = 0;
-	while (endSignal == 0)
+	while (endSignal == 1)
 	{
-		k++;
-
-		/*for (int j = 0; j < rightAnswers.rows(); j++)
-		{
-			rightAnswers(j, 0) = 0;
-			if (j == k % 10)
-			{
-				rightAnswers(j, 0) = 1;
-			}
-		}
-		for (int j = 0; j < inputMatrix.rows(); j++)
-		{
-			inputMatrix(j, 0) = 0;
-			if (j == k % 10)
-			{
-				inputMatrix(j, 0) = 1;
-			}
-		}*/
-		/*train(inputMatrix, rightAnswers);
-		saveWeights(weightMatrixes);*/
-
-		/*directPassage(inputMatrix);
-		cout << rightAnswers << endl << endl;
-		cout << neuronOutputs[neuronOutputs.size() - 1] << endl;*/
-
 		cout << "epoch: " << k << endl;
 
 		testModel(testDoc);
 
-		for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
+		/*for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
 		{
 			readDataset(trainDoc, inputMatrix, rightAnswers, i);
-			/*vector<double> row = trainDoc.GetRow<double>(i);
-			if (row[0] != 5.0 && row[0] != 0.0) continue;
-			for (int j = 0; j < rightAnswers.rows(); j++)
-			{
-				rightAnswers(j, 0) = 0;
-				if (j == row[0])
-				{
-					rightAnswers(j, 0) = 1;
-				}
-			}
-			for (int j = 1; j < row.size(); j++)
-			{
-				inputMatrix(j - 1, 0) = row[j];
-			}*/
+			
 			train(inputMatrix, rightAnswers);
 			if (i % 10000 == 0)
 			{
 				saveWeights(weightMatrixes);
 			}
-		}
-		//saveWeights(weightMatrixes);
-
-		//readDataset(testDoc, inputMatrix, rightAnswers, k);
-
-		/*vector<double> row = testDoc.GetRow<double>(k);
-		if (row[0] != 7) continue;
-		for (int j = 0; j < rightAnswers.rows(); j++)
-		{
-			rightAnswers(j, 0) = 0;
-			if (j == row[0])
-			{
-				rightAnswers(j, 0) = 1;
-			}
-		}
-		for (int j = 1; j < row.size(); j++)
-		{
-			inputMatrix(j - 1, 0) = row[j];
 		}*/
-
-		/*directPassage(inputMatrix);
-		cout << rightAnswers << endl << endl;
-		cout << neuronOutputs[neuronOutputs.size() - 1] << endl;
-
-		double error = 0;
-		for (int i = 0; i < rightAnswers.rows(); i++)
-		{
-			error += abs(rightAnswers(i, 0) - neuronOutputs[neuronOutputs.size() - 1](i, 0));
-		}*/
+		k++;
 	}
 
 	std::system("pause");
