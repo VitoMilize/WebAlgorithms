@@ -3,6 +3,7 @@ fieldRoot.addEventListener('mousedown', function (event) { isDrawing = true; dra
 fieldRoot.addEventListener('mousemove', function (event) { if (isDrawing) { draw(event); } });
 fieldRoot.addEventListener('mouseup', function () { isDrawing = false; });
 fieldRoot.addEventListener('mouseleave', function () { isDrawing = false; });
+const lableAnswer = document.querySelector('.lableAnswer');
 
 let tileSize = 10;
 let innerFieldSize = 28;
@@ -56,19 +57,21 @@ function draw(event) {
     for (let i = tileX - brushSize; i <= tileX + brushSize; i++) {
         for (let j = tileY - brushSize; j <= tileY + brushSize; j++) {
             if (0 <= i && i < outerFieldSize && 0 <= i && j < outerFieldSize) {
-                //if (getLenght({ x: i, y: j }, { x: tileX, y: tileY }) < brushSize) {
-                    let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
-                    outerField[j * outerFieldSize + i] += 255 * ((-0.1)*l*l*l + 1);
-                    if(outerField[j * outerFieldSize + i] > 255) 
-                    {
-                        outerField[j * outerFieldSize + i] = 255;
-                    }
-                //}
+                if (getLenght({ x: i, y: j }, { x: tileX, y: tileY }) < brushSize) {
+                    //let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
+                    //outerField[j * outerFieldSize + i] += 255 * ((-0.1)*l*l*l + 1);
+                    // if(outerField[j * outerFieldSize + i] > 255) 
+                    // {
+                    //     outerField[j * outerFieldSize + i] = 255;
+                    // }
+                    outerField[j * outerFieldSize + i] = 255;
+                }
             }
         }
     }
     updateFiedlDivs();
     let ans = detectNumber();
+    lableAnswer.textContent = "Answer: " + ans;
     //console.log(ans);
 }
 
@@ -92,8 +95,10 @@ function neuronWork(inputMatrix) {
         neuronOutputs[i] = applySigmoid(neuronOutputs[i]);
     }
     let answer = 0;
+    let maxValue = 0;
     for (let i = 0; i < neuronOutputs[neuronOutputs.length - 1].length; i++) {
-        if (neuronOutputs[neuronOutputs.length - 1][i][0] > answer) {
+        if (neuronOutputs[neuronOutputs.length - 1][i][0] > maxValue) {
+            maxValue = neuronOutputs[neuronOutputs.length - 1][i][0];
             answer = i;
         }
         console.log(i + ": " + neuronOutputs[neuronOutputs.length - 1][i][0])
@@ -139,10 +144,9 @@ loadWeights().then(() => {
 
 
 
-function applySigmoid(matrix)
-{
+function applySigmoid(matrix) {
     for (let i = 0; i < matrix.length; i++) {
-        matrix[i][0] = sigmoid(matrix[i][0]);       
+        matrix[i][0] = sigmoid(matrix[i][0]);
     }
     return matrix;
 }
