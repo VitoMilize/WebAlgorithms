@@ -58,13 +58,14 @@ function draw(event) {
         for (let j = tileY - brushSize; j <= tileY + brushSize; j++) {
             if (0 <= i && i < outerFieldSize && 0 <= i && j < outerFieldSize) {
                 if (getLenght({ x: i, y: j }, { x: tileX, y: tileY }) < brushSize) {
-                    //let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
-                    //outerField[j * outerFieldSize + i] += 255 * ((-0.1)*l*l*l + 1);
-                    // if(outerField[j * outerFieldSize + i] > 255) 
-                    // {
-                    //     outerField[j * outerFieldSize + i] = 255;
-                    // }
-                    outerField[j * outerFieldSize + i] = 255;
+
+                    let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
+                    outerField[j * outerFieldSize + i] += 170 * ((-0.2)*l*l*l + 1);
+                    if(outerField[j * outerFieldSize + i] > 255) 
+                    {
+                        outerField[j * outerFieldSize + i] = 255;
+                    }
+                    //outerField[j * outerFieldSize + i] = 255;
                 }
             }
         }
