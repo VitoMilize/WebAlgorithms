@@ -275,7 +275,7 @@ void convertWeightsToJson()
 
 int main()
 {
-	signal(SIGINT, signalHendler);
+	signal(SIGINT, signalHendler);d
 
 	rapidcsv::Document trainDoc("./dataset//mnist_train.csv");
 	rapidcsv::Document testDoc("./dataset//mnist_test.csv");
@@ -286,7 +286,7 @@ int main()
 	//createNewWeights(layers);
 
 	readWeights(weightMatrixes);
-	convertWeightsToJson();
+	//convertWeightsToJson();
 
 
 	directPassage(inputMatrix);
@@ -297,7 +297,7 @@ int main()
 	}
 
 	size_t k = 0;
-	while (endSignal == 1)
+	while (endSignal == 0)
 	{
 		cout << "epoch: " << k << endl;
 

@@ -4,7 +4,13 @@ fieldRoot.addEventListener('mousemove', function (event) { if (isDrawing) { draw
 fieldRoot.addEventListener('mouseup', function () { isDrawing = false; });
 fieldRoot.addEventListener('mouseleave', function () { isDrawing = false; });
 const lableAnswer = document.querySelector('.lableAnswer');
-
+const buttonClear = document.querySelector('.buttonClear');
+buttonClear.addEventListener('mousedown', () => {
+    for (let i = 0; i < outerField.length; i++) {
+        outerField[i] = 0;
+    }
+    updateFiedlDivs();
+})
 let tileSize = 10;
 let innerFieldSize = 28;
 let outerFieldSize = 28;
@@ -59,13 +65,12 @@ function draw(event) {
             if (0 <= i && i < outerFieldSize && 0 <= i && j < outerFieldSize) {
                 if (getLenght({ x: i, y: j }, { x: tileX, y: tileY }) < brushSize) {
 
-                    let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
-                    outerField[j * outerFieldSize + i] += 170 * ((-0.2)*l*l*l + 1);
-                    if(outerField[j * outerFieldSize + i] > 255) 
-                    {
-                        outerField[j * outerFieldSize + i] = 255;
-                    }
-                    //outerField[j * outerFieldSize + i] = 255;
+                    // let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
+                    // outerField[j * outerFieldSize + i] += 170 * ((-0.2) * l * l * l + 0.6);
+                    // if (outerField[j * outerFieldSize + i] > 255) {
+                    //     outerField[j * outerFieldSize + i] = 255;
+                    // }
+                    outerField[j * outerFieldSize + i] = 255;
                 }
             }
         }
@@ -102,7 +107,7 @@ function neuronWork(inputMatrix) {
             maxValue = neuronOutputs[neuronOutputs.length - 1][i][0];
             answer = i;
         }
-        console.log(i + ": " + neuronOutputs[neuronOutputs.length - 1][i][0])
+        //console.log(i + ": " + neuronOutputs[neuronOutputs.length - 1][i][0])
     }
     return answer;
 }
@@ -134,13 +139,32 @@ loadWeights().then(() => {
     }
 })
 
+let data;
+function loadData() {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                data = xhr.responseText;
+                resolve();
+            }
+        };
+        xhr.open('GET', './mnist_test.csv');
+        xhr.send();
+    });
+}
 
-
-
-
-
-
-
+loadData()
+    .then(() => {
+        let rows = data.split('\n');
+        let numbers = rows[61].split(',');
+        for (let i = 0; i < outerField.length; i++) {
+            outerField[i] = parseInt(numbers[i + 1]);
+        }
+        updateFiedlDivs();
+        let ans = detectNumber();
+        lableAnswer.textContent = "Answer: " + ans;
+    })
 
 
 
