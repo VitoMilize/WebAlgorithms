@@ -26,6 +26,27 @@ let neuronOutputs = new Array(layers.length);
 let brushSize = 2;
 let isDrawing = false;
 
+function onOpenCvReady() {
+    cv['onRuntimeInitialized'] = () => {
+        console.log("load")
+        const matData = Array(100 * 100);
+        for (let i = 0; i < 100; i++) {
+            for (let j = 0; j < 100; j++) {
+                matData[i * 100 + j] = j * 2;
+            }
+        }
+
+        const mat = cv.matFromArray(outerFieldSize, outerFieldSize, cv.CV_8UC1, outerField);
+
+        let newWidth = 100;
+        let newHeight = 100;
+        const dstMat = new cv.Mat();
+
+        cv.resize(mat, dstMat, new cv.Size(newWidth, newHeight), 0, 0, cv.INTER_LINEAR);
+        cv.imshow("outputCanvas", dstMat);
+    };
+}
+
 function addDivsToDisplay() {
     for (let i = 0; i < outerFieldSize; i++) {
         let row = document.createElement("div");
@@ -82,6 +103,43 @@ function draw(event) {
 }
 
 function createInputMatrix() {
+
+    let numberField = outerField.slice();
+    let numberFieldWidth = outerFieldSize;
+    let numberFieldHeight = outerFieldSize;
+
+    for (let i = 0; i < numberFieldHeight; i++) { // удалить пустые строки
+        let stringSum = 0;
+        for (let j = 0; j < numberFieldWidth; j++) {
+            stringSum += numberField[i * numberFieldWidth + j];
+        }
+        if (stringSum == 0) {
+            numberField.splice(i * numberFieldWidth, numberFieldWidth);
+            numberFieldHeight--;
+            i--;
+        }
+    }
+
+    for (let i = 0; i < numberFieldWidth; i++) { // удалить пустые слобцы
+        let colSum = 0;
+        for (let j = 0; j < numberFieldHeight; j++) {
+            colSum += numberField[j * numberFieldWidth + i];
+        }
+        if(colSum == 0)
+        {
+            for (let j = 0; j < numberFieldHeight; j++) {
+                numberField.splice(j * numberFieldWidth + i - j, 1);
+            }
+            numberFieldWidth--;
+            i--;
+        }
+    }
+
+    const mat = cv.matFromArray(numberFieldHeight, numberFieldWidth, cv.CV_8UC1, numberField);
+    
+    cv.imshow("outputCanvas", mat);
+    //console.log("show")
+
     let matrix = [];
     for (let i = 0; i < outerField.length; i++) {
         matrix.push([outerField[i]]);
