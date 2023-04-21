@@ -16,10 +16,10 @@ nextButton.addEventListener('mousedown', () => {
     let rows = data.split('\n');
     let numbers = rows[0].split(',');
 
-    while (numbers[0] != '9') {
+    //while (numbers[0] != '9') {
         numbers = rows[k].split(',');
         k++;
-    }
+    //}
 
     for (let i = 0; i < outerField.length; i++) {
         outerField[i] = parseInt(numbers[i + 1]);
@@ -29,7 +29,7 @@ nextButton.addEventListener('mousedown', () => {
     lableAnswer.textContent = "Answer: " + ans;
 })
 let tileSize = 10;
-let innerFieldSize = 28;
+let innerFieldSize = 20;
 let outerFieldSize = 50;
 
 let innerField = new Array(innerFieldSize * innerFieldSize);
@@ -72,7 +72,7 @@ function addDivsToDisplay() {
             let tile = document.createElement("div");
             tile.style.width = tileSize + 'px';
             tile.style.height = tileSize + 'px';
-            tile.style.background = "rgb(128, 128, 128)";
+            tile.style.background = "rgb(255, 255, 255)";
             tile.style.userSelect = "none";
             fieldDivs[i * outerFieldSize + j] = tile;
             row.appendChild(tile);
@@ -174,6 +174,7 @@ function createInputMatrix() {
             i--;
         }
     }
+
     let mat = cv.matFromArray(numberFieldHeight, numberFieldWidth, cv.CV_8UC1, numberField);
 
     if (numberFieldHeight > numberFieldWidth) {
@@ -191,8 +192,8 @@ function createInputMatrix() {
 
     numberField = Array.from(mat.data.slice());
 
-    let addRowsCount = 28 - numberFieldHeight;
-    let addColsCount = 28 - numberFieldWidth;
+    let addRowsCount = 20 - numberFieldHeight; // 28
+    let addColsCount = 20 - numberFieldWidth; // 28
 
     let addRowsUp = parseInt(addRowsCount / 2); // +1
     let addRowsDown = addRowsCount - addRowsUp;
@@ -225,12 +226,12 @@ function createInputMatrix() {
 
     mat = cv.matFromArray(numberFieldHeight, numberFieldWidth, cv.CV_8UC1, numberField);
 
-    let center = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
-    let shiftX = Math.round(numberFieldWidth / 2 - center.x);
-    let shiftY = Math.round(numberFieldHeight / 2 - center.y);
-    let Mdata = [1, 0, shiftX, 0, 1, shiftY]
-    let M = cv.matFromArray(2, 3, cv.CV_32FC1, Mdata)
-    cv.warpAffine(mat, mat, M, new cv.Size(numberFieldWidth, numberFieldHeight));
+    // let center = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
+    // let shiftX = Math.round(numberFieldWidth / 2 - center.x);
+    // let shiftY = Math.round(numberFieldHeight / 2 - center.y);
+    // let Mdata = [1, 0, shiftX, 0, 1, shiftY]
+    // let M = cv.matFromArray(2, 3, cv.CV_32FC1, Mdata)
+    // cv.warpAffine(mat, mat, M, new cv.Size(numberFieldWidth, numberFieldHeight));
 
     cv.imshow("outputCanvas", mat);
     //console.log("show")
@@ -240,12 +241,6 @@ function createInputMatrix() {
         matrix.push([numberField[i]]);
     }
     return matrix;
-
-    // let matrix = [];
-    // for (let i = 0; i < outerField.length; i++) {
-    //     matrix.push([outerField[i]]);
-    // }
-    // return matrix;
 }
 
 function detectNumber() {
@@ -298,40 +293,40 @@ loadWeights().then(() => {
     }
 })
 
-let data;
-function loadData() {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                data = xhr.responseText;
-                resolve();
-            }
-        };
-        xhr.open('GET', './mnist_train.csv');
-        xhr.send();
-    });
-}
+// let data;
+// function loadData() {
+//     return new Promise((resolve, reject) => {
+//         const xhr = new XMLHttpRequest();
+//         xhr.onreadystatechange = function () {
+//             if (xhr.readyState === 4 && xhr.status === 200) {
+//                 data = xhr.responseText;
+//                 resolve();
+//             }
+//         };
+//         xhr.open('GET', './mnist_test.csv');
+//         xhr.send();
+//     });
+// }
 
-let k = 0;
+// let k = 0;
 
-loadData()
-    .then(() => {
-        let rows = data.split('\n');
-        let numbers = rows[0].split(',');
+// loadData()
+//     .then(() => {
+//         let rows = data.split('\n');
+//         let numbers = rows[0].split(',');
 
-        while (numbers[0] != '9') {
-            numbers = rows[k].split(',');
-            k++;
-        }
+//         //while (numbers[0] != '9') {
+//             numbers = rows[k].split(',');
+//             k++;
+//         //}
 
-        for (let i = 0; i < outerField.length; i++) {
-            outerField[i] = parseInt(numbers[i + 1]);
-        }
-        updateFiedlDivs();
-        let ans = detectNumber();
-        lableAnswer.textContent = "Answer: " + ans;
-    })
+//         for (let i = 0; i < outerField.length; i++) {
+//             outerField[i] = parseInt(numbers[i + 1]);
+//         }
+//         updateFiedlDivs();
+//         let ans = detectNumber();
+//         lableAnswer.textContent = "Answer: " + ans;
+//     })
 
 
 

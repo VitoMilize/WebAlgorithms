@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 volatile sig_atomic_t endSignal;
 
-int inputSize = 28*28;
+int inputSize = 20*20;
 vector<int> layers = { inputSize, 512, 128, 10 };
 vector<MatrixXd> weightMatrixes(layers.size());
 vector<MatrixXd> neuronInputs(layers.size());
@@ -177,17 +177,103 @@ void train(MatrixXd inputMatrix, MatrixXd rightAnswers)
 void readDataset(rapidcsv::Document& doc, MatrixXd& inputMatrix, MatrixXd& rightAnswers, int i)
 {
 	vector<double> row = doc.GetRow<double>(i);
+	int number = row[0];
+	row.erase(row.begin());
+	int width = 28, height = 28;
+
+	for (int i = 0; i < height; i++)
+	{
+		double stringSum = 0;
+		for (int j = 0; j < width; j++)
+		{
+			stringSum += row[i * width + j];
+		}
+		if (stringSum == 0)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				row.erase(row.begin() + (i * width));
+			}
+			i--;
+			height--;
+		}
+	}
+
+	for (int i = 0; i < width; i++)
+	{
+		double colSum = 0;
+		for (int j = 0; j < height; j++)
+		{
+			colSum += row[j * width + i];
+		}
+		if (colSum == 0)
+		{
+			for (int j = 0; j < height; j++)
+			{
+				row.erase(row.begin() + (j * width + i - j));
+			}
+			i--;
+			width--;
+		}
+	}
+	//cout << endl << width << " " << height << endl;
+
+	int addRows = 20 - height;
+	int addCols = 20 - width;
+	int addRowsDown = addRows / 2;
+	int addRowsUp = addRows - addRowsDown;
+	int addColsRight = addCols / 2;
+	int addColsLeft = addCols - addColsRight;
+
+
+	for (int i = 0; i < addRowsDown * width; i++)
+	{
+		row.push_back(0);
+	}
+	height += addRowsDown;
+
+	for (int i = 0; i < addRowsUp * width; i++)
+	{
+		row.insert(row.begin(), 0);
+	}
+	height += addRowsUp;
+
+	for (int i = height - 1; i >= 0; i--)
+	{
+		for (int j = 0; j < addColsRight; j++)
+		{
+			row.insert(row.begin() + (i * width + width), 0);
+		}
+		for (int j = 0; j < addColsLeft; j++)
+		{
+			row.insert(row.begin() + (i * width), 0);
+		}
+	}
+
+	width += addCols;
+
+	/*for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			cout << row[i * width + j] << " ";
+		}
+		cout << endl;
+	}
+
+	cout << endl << width << " " <<  height<< endl;*/
+
 	for (int j = 0; j < rightAnswers.rows(); j++)
 	{
 		rightAnswers(j, 0) = 0;
-		if (j == row[0])
+		if (j == number)
 		{
 			rightAnswers(j, 0) = 1;
 		}
 	}
-	for (int j = 1; j < row.size(); j++)
+	for (int j = 0; j < row.size(); j++)
 	{
-		inputMatrix(j - 1, 0) = row[j];
+		inputMatrix(j, 0) = row[j];
 	}
 }
 
@@ -281,12 +367,12 @@ int main()
 	rapidcsv::Document testDoc("./dataset//mnist_test.csv");
 	MatrixXd inputMatrix(inputSize, 1);
 	MatrixXd rightAnswers(layers[layers.size() - 1], 1);
-	readDataset(trainDoc, inputMatrix, rightAnswers, 0);
+	readDataset(trainDoc, inputMatrix, rightAnswers, 2);
 
 	//createNewWeights(layers);
 
 	readWeights(weightMatrixes);
-	//convertWeightsToJson();
+	convertWeightsToJson();
 
 
 	directPassage(inputMatrix);
@@ -297,13 +383,13 @@ int main()
 	}
 
 	size_t k = 0;
-	while (endSignal == 0)
+	while (endSignal == 1)
 	{
 		cout << "epoch: " << k << endl;
 
 		testModel(testDoc);
 
-		/*for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
+		for (int i = 0; i < trainDoc.GetRowCount() && endSignal == 0; i++)
 		{
 			readDataset(trainDoc, inputMatrix, rightAnswers, i);
 			
@@ -312,7 +398,7 @@ int main()
 			{
 				saveWeights(weightMatrixes);
 			}
-		}*/
+		}
 		k++;
 	}
 
