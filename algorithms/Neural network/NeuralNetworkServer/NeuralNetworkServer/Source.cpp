@@ -275,7 +275,7 @@ void convertWeightsToJson()
 
 int main()
 {
-	signal(SIGINT, signalHendler);d
+	signal(SIGINT, signalHendler);
 
 	rapidcsv::Document trainDoc("./dataset//mnist_train.csv");
 	rapidcsv::Document testDoc("./dataset//mnist_test.csv");
