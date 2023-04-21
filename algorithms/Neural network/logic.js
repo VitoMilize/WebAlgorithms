@@ -12,26 +12,25 @@ buttonClear.addEventListener('mousedown', () => {
     }
     updateFiedlDivs();
 })
-nextButton.addEventListener('mousedown', ()=>{
+nextButton.addEventListener('mousedown', () => {
     let rows = data.split('\n');
-        let numbers = rows[0].split(',');
-        
-        //while(numbers[0] != '9')
-        {
-            numbers = rows[k].split(',');
-            k++;
-        }
-        
-        for (let i = 0; i < outerField.length; i++) {
-            outerField[i] = parseInt(numbers[i + 1]);
-        }
-        updateFiedlDivs();
-        let ans = detectNumber();
-        lableAnswer.textContent = "Answer: " + ans;
+    let numbers = rows[0].split(',');
+
+    while (numbers[0] != '9') {
+        numbers = rows[k].split(',');
+        k++;
+    }
+
+    for (let i = 0; i < outerField.length; i++) {
+        outerField[i] = parseInt(numbers[i + 1]);
+    }
+    updateFiedlDivs();
+    let ans = detectNumber();
+    lableAnswer.textContent = "Answer: " + ans;
 })
 let tileSize = 10;
 let innerFieldSize = 28;
-let outerFieldSize = 28;
+let outerFieldSize = 50;
 
 let innerField = new Array(innerFieldSize * innerFieldSize);
 let outerField = new Array(outerFieldSize * outerFieldSize);
@@ -120,8 +119,7 @@ function draw(event) {
     //console.log(ans);
 }
 
-function findCenterOfMass(field, sizeX, sizeY)
-{
+function findCenterOfMass(field, sizeX, sizeY) {
     let totalMass = 0;
     let sumOverX = 0, sumOverY = 0;
 
@@ -131,21 +129,25 @@ function findCenterOfMass(field, sizeX, sizeY)
 
     for (let i = 0; i < sizeY; i++) {
         for (let j = 0; j < sizeX; j++) {
-            sumOverX += i * field[i * sizeX + j];
-            sumOverY += j * field[i * sizeX + j];
+            sumOverY += i * field[i * sizeX + j];
+            sumOverX += j * field[i * sizeX + j];
         }
     }
 
     let cx = sumOverX / totalMass;
     let cy = sumOverY / totalMass;
-    return {x:cx, y:cy};
+    return { x: cx, y: cy };
 }
 
 function createInputMatrix() {
 
     let numberField = outerField.slice();
+    let numberField1 = outerField.slice();
     let numberFieldWidth = outerFieldSize;
     let numberFieldHeight = outerFieldSize;
+
+    //let cc = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
+    //console.log(cc);
 
     for (let i = 0; i < numberFieldHeight; i++) { // удалить пустые строки
         let stringSum = 0;
@@ -216,7 +218,7 @@ function createInputMatrix() {
             numberField.splice(i * numberFieldWidth + numberFieldWidth, 0, 0)
         }
         for (let j = 0; j < addColsLeft; j++) { // добавить слева
-            numberField.splice(i * numberFieldWidth, 0, 0) 
+            numberField.splice(i * numberFieldWidth, 0, 0)
         }
     }
     numberFieldWidth += addColsCount;
@@ -224,8 +226,8 @@ function createInputMatrix() {
     mat = cv.matFromArray(numberFieldHeight, numberFieldWidth, cv.CV_8UC1, numberField);
 
     let center = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
-    let shiftX = -Math.round(numberFieldWidth / 2 - center.x);
-    let shiftY = -Math.round(numberFieldHeight / 2 - center.y);
+    let shiftX = Math.round(numberFieldWidth / 2 - center.x);
+    let shiftY = Math.round(numberFieldHeight / 2 - center.y);
     let Mdata = [1, 0, shiftX, 0, 1, shiftY]
     let M = cv.matFromArray(2, 3, cv.CV_32FC1, Mdata)
     cv.warpAffine(mat, mat, M, new cv.Size(numberFieldWidth, numberFieldHeight));
@@ -317,13 +319,12 @@ loadData()
     .then(() => {
         let rows = data.split('\n');
         let numbers = rows[0].split(',');
-        
-        while(numbers[0] != '9')
-        {
+
+        while (numbers[0] != '9') {
             numbers = rows[k].split(',');
             k++;
         }
-        
+
         for (let i = 0; i < outerField.length; i++) {
             outerField[i] = parseInt(numbers[i + 1]);
         }
