@@ -1,3 +1,13 @@
 *{
     font-family: Arial, Helvetica, sans-serif;
 }
+.start{
+    background-color: aquamarine !important;
+}
+
+.border{
+    background-color: black;
+}
+.empty{
+    background-color: white;
+}

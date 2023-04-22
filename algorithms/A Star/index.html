@@ -10,9 +10,17 @@
 <body>
     <label for="size">Введите размер лабиринта:</label>
     <input type="number" id="size" name="size">
-    <button onclick="CreateMaze()">Создать лабиринт</button>
-    <div class="matrix"> </div>
+
+    <button onclick="CreateMaze()">Соvaздать лабиринт</button>
+    <button onclick="CreateWall()">Добавить/Удалить стену</button>
+    <button onclick="CreateBegin()">Добавить/Удалить начало</button>
+    <button onclick="CreateEnd()">Добавить/Удалить конец</button>
+    <div class="matrix" id="maze"> </div>
+
+    <button onclick="searchWay()">Найти путь</button>
+
     <script src="./logic.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
 </body>
 
 </html>
