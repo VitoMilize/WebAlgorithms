@@ -1,7 +1,7 @@
 let adjacencyMatrix = [];
 let amountOfCity;
-let populationSize = 1500;
-let mutationRate = 100;
+let populationSize = 2500;
+let mutationRate = 75;
 
 function getDistance(point1, point2) {
     return Math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2);
@@ -91,14 +91,15 @@ function crossoverPopulation(population) {
 
 function mutatedGene(gnome) {
     const newGnome = [...gnome];
-    while (true) {
+    let mutations = 0;
+    while (mutations !== 250) {
         const gene1 = randNum(1, amountOfCity - 1);
         const gene2 = randNum(1, amountOfCity - 1);
         if (gene1 !== gene2) {
             const temp = newGnome[gene1];
             newGnome[gene1] = newGnome[gene2];
             newGnome[gene2] = temp;
-            break;
+            mutations++;
         }
     }
 
@@ -114,11 +115,20 @@ function mutatePopulation(population) {
     return mutatedPopulation;
 }
 
-
-function TSPUtil() {
+function delay(timeout) {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+}
+async function TSPUtil() {
     let population = [];
 
     amountOfCity = points.length;
+    if (amountOfCity === 2)
+        return;
+    if (amountOfCity === 3) {
+        drawPath([0, 1, 2, 0]);
+        return;
+    }
+
     adjacencyMatrix = createAdjacencyMatrix();
 
     for (let i = 0; i < populationSize; i++) {
@@ -130,21 +140,25 @@ function TSPUtil() {
 
     let bestPath = new individual(null, Infinity)
     bestPath = findBestPath(population, bestPath);
+    console.log(bestPath);
     drawPath(bestPath.gnome);
 
     let similarPathTimes = 0;
-    while (similarPathTimes < 3000) {
+    while (similarPathTimes < 1500) {
         let new_population = crossoverPopulation(population);
         new_population = mutatePopulation(new_population);
 
         population = new_population;
         let bestPathInPopulation = findBestPath(population, bestPath);
-        if (bestPath.gnome.toString() !== bestPathInPopulation.gnome.toString() || bestPath.fitness !== bestPathInPopulation.fitness) {
+        if (bestPath.fitness > bestPathInPopulation.fitness) {
+            console.log('draw');
             bestPath = bestPathInPopulation;
             drawPath(bestPath.gnome);
+            await delay(10);
             similarPathTimes = 0;
         }
         else
             similarPathTimes++;
     }
+    alert("конец");
 }

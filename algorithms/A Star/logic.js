@@ -242,7 +242,7 @@ async function searchWay() {
   }
 
   if (f == false) {
-    alert("Молодец блять, пути нет!");
+    alert("Молодец , пути нет!");
     return;
   }
   x = endX;
