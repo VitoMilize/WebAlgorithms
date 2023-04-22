@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+    integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+    crossorigin="anonymous" defer></script>
+
+  <title>Муравьиный алгоритм</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="menu">
+
+      <div class="leftMenu">
+        
+        <label for="inputFieldSize">Размер поля:</label>
+        <input class="inputField" id="inputFieldSize" type="number" value="1000"/>
+
+        <label for="inputAntCount">Число мурашей:</label>
+        <input  id="inputAntCount" type="range" value="300" min="0" max="1000" />
+        <label class="lableAntCount"></label>
+
+        <button id="regenButton">Сгенерировать</button>
+      </div>
+
+      <button class="startButton" id="startButton">Старт/стоп</button>
+
+      <div>
+        <label for="inputSimulationSpeed">Скорость симуляции:</label>
+        <input class="inputField" id="inputSimulationSpeed" type="number" min="1" max="5" value="1" />
+
+        <label for="selectBrush">Кисть: </label>
+        <select id="selectBrush">
+          <option value="home">дом</option>
+          <option value="food">еда</option>
+          <option value="obstacle">препятсвие</option>
+          <option value="erase">стереть</option>
+          <option value="foodMarker">Маркер еды</option>
+          <option value="homeMarker">Маркер дома</option>
+        </select>
+        <label for="inputBrushSize">Размер кисти:</label>
+        <input id="inputBrushSize" type="range" value="20" min="10" max="99"/>
+        <label class="lableBrushSize"></label>
+      </div>
+
+    </div>
+
+    <canvas class="canvas" height="50px" width="1700px"></canvas>
+  </div>
+
+  <script type="module" src="./Ant.js"></script>
+  <script type="module" src="./WebGLFunctions.js"></script>
+  <script type="module" src="./logic.js"></script>
+</body>
+
+</html>
