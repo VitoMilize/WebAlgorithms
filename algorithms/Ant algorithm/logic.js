@@ -27,9 +27,13 @@ startButton.addEventListener('click', function () {
 
 const inputFieldSize = document.getElementById('inputFieldSize');
 const inputAntCount = document.getElementById('inputAntCount');
+document.querySelector(".lableAntCount").textContent = inputAntCount.value;
+inputAntCount.addEventListener('input', function () {
+    document.querySelector(".lableAntCount").textContent = inputAntCount.value;
+});
 
 const inputSimulationSpeed = document.getElementById('inputSimulationSpeed');
-inputSimulationSpeed.addEventListener('focusout', function (e) {
+inputSimulationSpeed.addEventListener('input', function (e) {
     simulationSpeed = parseInt(inputSimulationSpeed.value);
     for (let i = 0; i < antCount; i++) {
         ants[i].speed = simulationSpeed;
@@ -38,8 +42,10 @@ inputSimulationSpeed.addEventListener('focusout', function (e) {
 })
 
 const inputBrushSize = document.getElementById('inputBrushSize');
-inputBrushSize.addEventListener('focusout', function () {
+document.querySelector(".lableBrushSize").textContent = inputBrushSize.value;
+inputBrushSize.addEventListener('input', function () {
     brushSize = parseInt(inputBrushSize.value);
+    document.querySelector(".lableBrushSize").textContent = inputBrushSize.value;
 })
 
 const selectBrush = document.getElementById('selectBrush');
