@@ -11,3 +11,17 @@
     width: 60px;
     height: 50px;
 }
+
+.menu{
+    margin-bottom: 7px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 0px;
+}
