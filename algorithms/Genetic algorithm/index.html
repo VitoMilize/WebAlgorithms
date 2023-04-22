@@ -4,10 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./styles.css">
+    <script src="./draw.js"></script>
+    <script src="./algo.js"></script>
+    <script src="./individual.js"></script>
     <title>Генетический алгоритм</title>
 </head>
 
 <body>
+    <button id="start button">Запуск</button>
+    <canvas class="map" id="map"></canvas>
     <div class="container">
         <div class="menu">
             <button class="button" id="buttonStart"></button>
@@ -23,6 +28,14 @@
     </div>
 
     <script src="./logic.js"></script>
+    <div class="menu">
+        <button class="button" id="a star algo">А*</button>
+        <button class="button" id="ant algo">Муравьиный алгоритм</button>
+        <button class="button" id="genetic algo">Генетический алгоритм</button>
+        <button class="button" id="tree algo">Дерево решений</button>
+        <button class="button" id="cluster algo">Кластеризация</button>
+        <button class="button" id="neural algo">Нейронная сеть</button>
+    </div>
 </body>
 
 </html>

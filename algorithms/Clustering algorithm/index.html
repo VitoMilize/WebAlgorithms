@@ -81,6 +81,21 @@
     </div>
 
 
+        sliderForNeighborsAmount.addEventListener("input", function() {
+            sliderValueForNeighborsAmount.textContent = sliderForNeighborsAmount.value;
+        });
+    </script>
+
+    <canvas class="map" id="map"></canvas>
+
+    <div>
+        <button class="button" id="a star algo">А*</button>
+        <button class="button" id="ant algo">Муравьиный алгоритм</button>
+        <button class="button" id="genetic algo">Генетический алгоритм</button>
+        <button class="button" id="tree algo">Дерево решений</button>
+        <button class="button" id="cluster algo">Кластеризация</button>
+        <button class="button" id="neural algo">Нейронная сеть</button>
+    </div>
     <script src="./logic.js"></script>
 </body>
 
