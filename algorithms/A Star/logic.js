@@ -8,10 +8,12 @@ let endY = 1;
 let check = 0;
 let create = 0;
 const mazeListener = document.getElementById("maze");
-$("#maze");
+//$("#maze");
 
 let addingBegin = false;
 let addingEnd = false;
+
+CreateMaze();
 
 function CreateMaze() {
   beginX = 1;

@@ -10,13 +10,9 @@
     text-align: center;
     margin: 0px;
 }
-/* .menu{
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    align-content: center;
-    text-align: center;
-} */
+.menu{
+    margin-top: 6px;
+}
 .canvas{
     position: fixed;
     display: block;

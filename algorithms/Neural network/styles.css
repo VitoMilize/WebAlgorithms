@@ -10,9 +10,7 @@
     text-align: center;
     margin: 0px;
 }
-.field{
-    display: inline-block;
-}
+
 .body{
     background-color: rgb(200, 200, 200);
     display: flex;
@@ -27,9 +25,11 @@
 .fieldCanvas{
     width: 500px;
     height: 500px;
+    margin-bottom: 20px;
 }
 .lableAnswer{
     margin: 20px;
+    font-size: large;
 }
 .buttonClear{
     margin-right: 20px;
