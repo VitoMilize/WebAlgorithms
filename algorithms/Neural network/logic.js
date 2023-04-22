@@ -1,142 +1,93 @@
-const fieldRoot = document.querySelector('.field');
-fieldRoot.addEventListener('mousedown', function (event) { isDrawing = true; draw(event); });
-fieldRoot.addEventListener('mousemove', function (event) { if (isDrawing) { draw(event); } });
-fieldRoot.addEventListener('mouseup', function () { isDrawing = false; });
-fieldRoot.addEventListener('mouseleave', function () { isDrawing = false; });
+const fieldCanvas = document.querySelector('.fieldCanvas');
+fieldCanvas.addEventListener('mousedown', function (event) { isDrawing = true; draw(event); });
+fieldCanvas.addEventListener('mousemove', function (event) { if (isDrawing) { draw(event); } });
+fieldCanvas.addEventListener('mouseup', function () { isDrawing = false; });
+fieldCanvas.addEventListener('mouseleave', function () { isDrawing = false; });
+let ctx = fieldCanvas.getContext('2d');
+
+const inputBrushSize = document.getElementById('inputBrushSize');
+inputBrushSize.addEventListener('change', function () {
+    brushSize = parseInt(inputBrushSize.value);
+});
+
+
 const lableAnswer = document.querySelector('.lableAnswer');
 const buttonClear = document.querySelector('.buttonClear');
-const nextButton = document.querySelector('.nextButton');
 buttonClear.addEventListener('mousedown', () => {
     for (let i = 0; i < outerField.length; i++) {
         outerField[i] = 0;
     }
-    updateFiedlDivs();
+    drawField();
 })
-nextButton.addEventListener('mousedown', () => {
-    let rows = data.split('\n');
-    let numbers = rows[0].split(',');
 
-    //while (numbers[0] != '9') {
-        numbers = rows[k].split(',');
-        k++;
-    //}
-
-    for (let i = 0; i < outerField.length; i++) {
-        outerField[i] = parseInt(numbers[i + 1]);
-    }
-    updateFiedlDivs();
-    let ans = detectNumber();
-    lableAnswer.textContent = "Answer: " + ans;
-})
 let tileSize = 10;
 let innerFieldSize = 20;
-let outerFieldSize = 50;
+let outerFieldSize = 100;
+
+let canvasTileSize = fieldCanvas.width/outerFieldSize;
 
 let innerField = new Array(innerFieldSize * innerFieldSize);
 let outerField = new Array(outerFieldSize * outerFieldSize);
 let fieldDivs = new Array(outerFieldSize * outerFieldSize);
 
+for (let i = 0; i < outerField.length; i++) {
+    outerField[i] = 0;
+}
+
 let layers = [innerFieldSize * innerFieldSize, 512, 128, 10];
 let weightMatrixes = new Array(layers.length);
 let neuronOutputs = new Array(layers.length);
 
-let brushSize = 2;
+let brushSize = 4;
 let isDrawing = false;
 
 function onOpenCvReady() {
     cv['onRuntimeInitialized'] = () => {
-        console.log("load")
-        const matData = Array(100 * 100);
-        for (let i = 0; i < 100; i++) {
-            for (let j = 0; j < 100; j++) {
-                matData[i * 100 + j] = j * 2;
-            }
-        }
-
         const mat = cv.matFromArray(outerFieldSize, outerFieldSize, cv.CV_8UC1, outerField);
-
         let newWidth = 100;
         let newHeight = 100;
         const dstMat = new cv.Mat();
-
         cv.resize(mat, dstMat, new cv.Size(newWidth, newHeight), 0, 0, cv.INTER_LINEAR);
         cv.imshow("outputCanvas", dstMat);
     };
 }
 
-function addDivsToDisplay() {
+function drawField()
+{
     for (let i = 0; i < outerFieldSize; i++) {
-        let row = document.createElement("div");
-        row.style.display = "flex";
         for (let j = 0; j < outerFieldSize; j++) {
-            let tile = document.createElement("div");
-            tile.style.width = tileSize + 'px';
-            tile.style.height = tileSize + 'px';
-            tile.style.background = "rgb(255, 255, 255)";
-            tile.style.userSelect = "none";
-            fieldDivs[i * outerFieldSize + j] = tile;
-            row.appendChild(tile);
-            outerField[i * outerFieldSize + j] = 0;
+            let color = 255 - outerField[i * outerFieldSize + j];
+            ctx.fillStyle = `rgb(${color},${color},${color})`;
+            ctx.fillRect (j*canvasTileSize, i * canvasTileSize, canvasTileSize, canvasTileSize)
         }
-        fieldRoot.appendChild(row);
-    }
-    fieldRoot.style.width = outerFieldSize * tileSize + 'px';
-    fieldRoot.style.height = outerFieldSize * tileSize + 'px';
-}
-
-function updateFiedlDivs() {
-    for (let i = 0; i < outerFieldSize * outerFieldSize; i++) {
-        let color = 255 - outerField[i];
-        fieldDivs[i].style.background = `rgb(${color},${color},${color})`;
     }
 }
 
 function draw(event) {
-    let x = event.clientX - fieldRoot.getBoundingClientRect().left;
-    let y = event.clientY - fieldRoot.getBoundingClientRect().top;
+    let x = event.clientX - fieldCanvas.getBoundingClientRect().left;
+    let y = event.clientY - fieldCanvas.getBoundingClientRect().top;
 
-    let tileX = parseInt(x / tileSize);
-    let tileY = parseInt(y / tileSize);
+    let tileX = parseInt(x / canvasTileSize);
+    let tileY = parseInt(y / canvasTileSize);
 
     for (let i = tileX - brushSize; i <= tileX + brushSize; i++) {
         for (let j = tileY - brushSize; j <= tileY + brushSize; j++) {
             if (0 <= i && i < outerFieldSize && 0 <= i && j < outerFieldSize) {
                 if (getLenght({ x: i, y: j }, { x: tileX, y: tileY }) < brushSize) {
 
-                    let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
-                    outerField[j * outerFieldSize + i] = Math.max(255 * ((-0.2) * l * l * l + 1), outerField[j * outerFieldSize + i]);
+                    // let l = getLenght({ x: i, y: j }, { x: tileX, y: tileY });
+                    // outerField[j * outerFieldSize + i] = Math.max(255 * ((-0.2) * l * l * l + 1), outerField[j * outerFieldSize + i]);
                     // if (outerField[j * outerFieldSize + i] > 255) {
                     //     outerField[j * outerFieldSize + i] = 255;
                     // }
-                    //outerField[j * outerFieldSize + i] = 255;
+                    outerField[j * outerFieldSize + i] = 255;
                 }
             }
         }
     }
-    updateFiedlDivs();
+    drawField();
     let ans = detectNumber();
     lableAnswer.textContent = "Answer: " + ans;
-    //console.log(ans);
-}
-
-function findCenterOfMass(field, sizeX, sizeY) {
-    let totalMass = 0;
-    let sumOverX = 0, sumOverY = 0;
-
-    for (let i = 0; i < sizeX * sizeY; i++) {
-        totalMass += field[i];
-    }
-
-    for (let i = 0; i < sizeY; i++) {
-        for (let j = 0; j < sizeX; j++) {
-            sumOverY += i * field[i * sizeX + j];
-            sumOverX += j * field[i * sizeX + j];
-        }
-    }
-
-    let cx = sumOverX / totalMass;
-    let cy = sumOverY / totalMass;
-    return { x: cx, y: cy };
 }
 
 function createInputMatrix() {
@@ -145,9 +96,6 @@ function createInputMatrix() {
     let numberField1 = outerField.slice();
     let numberFieldWidth = outerFieldSize;
     let numberFieldHeight = outerFieldSize;
-
-    //let cc = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
-    //console.log(cc);
 
     for (let i = 0; i < numberFieldHeight; i++) { // удалить пустые строки
         let stringSum = 0;
@@ -225,16 +173,8 @@ function createInputMatrix() {
     numberFieldWidth += addColsCount;
 
     mat = cv.matFromArray(numberFieldHeight, numberFieldWidth, cv.CV_8UC1, numberField);
-
-    // let center = findCenterOfMass(numberField, numberFieldWidth, numberFieldHeight);
-    // let shiftX = Math.round(numberFieldWidth / 2 - center.x);
-    // let shiftY = Math.round(numberFieldHeight / 2 - center.y);
-    // let Mdata = [1, 0, shiftX, 0, 1, shiftY]
-    // let M = cv.matFromArray(2, 3, cv.CV_32FC1, Mdata)
-    // cv.warpAffine(mat, mat, M, new cv.Size(numberFieldWidth, numberFieldHeight));
-
+    cv.resize(mat, mat, new cv.Size(100, 100), 0, 0, cv.INTER_LINEAR);
     cv.imshow("outputCanvas", mat);
-    //console.log("show")
 
     let matrix = [];
     for (let i = 0; i < numberField.length; i++) {
@@ -261,7 +201,6 @@ function neuronWork(inputMatrix) {
             maxValue = neuronOutputs[neuronOutputs.length - 1][i][0];
             answer = i;
         }
-        //console.log(i + ": " + neuronOutputs[neuronOutputs.length - 1][i][0])
     }
     return answer;
 }
@@ -284,7 +223,7 @@ async function loadWeights() {
 }
 
 loadWeights().then(() => {
-    addDivsToDisplay();
+    drawField()
     for (let i = 0; i < layers.length; i++) {
         neuronOutputs[i] = new Array(layers[i]);
         for (let j = 0; j < layers[i]; j++) {
@@ -292,44 +231,6 @@ loadWeights().then(() => {
         }
     }
 })
-
-// let data;
-// function loadData() {
-//     return new Promise((resolve, reject) => {
-//         const xhr = new XMLHttpRequest();
-//         xhr.onreadystatechange = function () {
-//             if (xhr.readyState === 4 && xhr.status === 200) {
-//                 data = xhr.responseText;
-//                 resolve();
-//             }
-//         };
-//         xhr.open('GET', './mnist_test.csv');
-//         xhr.send();
-//     });
-// }
-
-// let k = 0;
-
-// loadData()
-//     .then(() => {
-//         let rows = data.split('\n');
-//         let numbers = rows[0].split(',');
-
-//         //while (numbers[0] != '9') {
-//             numbers = rows[k].split(',');
-//             k++;
-//         //}
-
-//         for (let i = 0; i < outerField.length; i++) {
-//             outerField[i] = parseInt(numbers[i + 1]);
-//         }
-//         updateFiedlDivs();
-//         let ans = detectNumber();
-//         lableAnswer.textContent = "Answer: " + ans;
-//     })
-
-
-
 
 function applySigmoid(matrix) {
     for (let i = 0; i < matrix.length; i++) {
