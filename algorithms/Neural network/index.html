@@ -1,12 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./styles.css">
-    <title>main</title>
+    <script async src="opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    <title>Neural network</title>
 </head>
-<body>
-    
+
+<body class="body">
+    <div class="menu">
+        <button class="buttonClear">Clear field</button>
+        <label for="inputBrushSize">Brush size:</label>
+        <input class="inputField" id="inputBrushSize" type="range" value="4" min="1" max="10"/>
+    </div>
+
+    <div class="container">
+        <canvas class = "fieldCanvas" width="500" height="500"></canvas>
+        
+        <label class="lableAnswer">Answer </label>
+        <canvas id="outputCanvas" width="100" height="100"></canvas>
+
+    </div>
     <script src="./logic.js"></script>
 </body>
+
 </html>

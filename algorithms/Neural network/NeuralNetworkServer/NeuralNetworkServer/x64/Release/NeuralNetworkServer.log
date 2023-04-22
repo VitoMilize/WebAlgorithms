@@ -1,0 +1,15 @@
+﻿  Source.cpp
+C:\XLiid\SSDProjects\Development\WebAlgorithms\algorithms\Neural network\NeuralNetworkServer\NeuralNetworkServer\Functions.h(10,11): warning C4244: инициализация: преобразование "Eigen::Index" в "int", возможна потеря данных
+C:\XLiid\SSDProjects\Development\WebAlgorithms\algorithms\Neural network\NeuralNetworkServer\NeuralNetworkServer\Functions.h(10,28): warning C4244: инициализация: преобразование "Eigen::Index" в "int", возможна потеря данных
+C:\XLiid\SSDProjects\Development\WebAlgorithms\algorithms\Neural network\NeuralNetworkServer\NeuralNetworkServer\Source.cpp(128,2): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+C:\XLiid\SSDProjects\Development\WebAlgorithms\algorithms\Neural network\NeuralNetworkServer\NeuralNetworkServer\Source.cpp(180,13): warning C4244: инициализация: преобразование "_Ty" в "int", возможна потеря данных
+          with
+          [
+              _Ty=double
+          ]
+  Создание кода
+  716 of 3221 functions (22.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    81 functions had inline decision re-evaluated but remain unchanged
+  Создание кода завершено
+  NeuralNetworkServer.vcxproj -> C:\XLiid\SSDProjects\Development\WebAlgorithms\algorithms\Neural network\NeuralNetworkServer\x64\Release\NeuralNetworkServer.exe
