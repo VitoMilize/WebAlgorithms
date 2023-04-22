@@ -87,7 +87,7 @@ function draw(event) {
     }
     drawField();
     let ans = detectNumber();
-    lableAnswer.textContent = "Answer: " + ans;
+    lableAnswer.textContent = "Ответ: " + ans;
 }
 
 function createInputMatrix() {
