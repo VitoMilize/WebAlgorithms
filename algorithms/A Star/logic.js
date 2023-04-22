@@ -1,3 +1,4 @@
+
 let matrix = document.querySelector(".matrix"); // получаем объект матрицы по ID
 let map = new Array(size);
 let beginX;
@@ -15,11 +16,13 @@ let addingEnd = false;
 function CreateMaze() {
   beginX = 1;
   beginY = 1;
+
   while (matrix.firstChild) {
     matrix.removeChild(matrix.firstChild);
   }
   let sizeInput = document.getElementById("size");
   let size = parseInt(sizeInput.value);
+
   if (size % 2 == 0) {
     size++;
   }
@@ -129,8 +132,10 @@ function CreateMaze() {
     }
   }
 
+
   map[beginX][beginY] = 2;
   map[endX][endY] = 3;
+
 
   for (let i = 0; i < size; i++) {
     let row = document.createElement("div");
@@ -139,13 +144,16 @@ function CreateMaze() {
       let cell;
       cell = document.createElement("div");
       cell.style.width = 612 / size + "px";
+
       cell.style.height = 612 / size + "px";
       cell.id = `${i}_${j}`
+
       if (map[i][j] == 0) {
         cell.style.background = "rgb(255, 255, 255)";
       }
       else if (map[i][j] == 1) {
         cell.style.background = "rgb(0, 0, 0)";
+
       }
       else if (map[i][j] == 2) {
         cell.style.background = "rgb(0, 255, 0)";
@@ -153,10 +161,12 @@ function CreateMaze() {
       else {
         cell.style.background = "rgb(255, 0, 0)";
       }
+
       row.appendChild(cell);
     }
     matrix.appendChild(row);
   }
+
   //$(`#${0}_${0}`).css('background-color', 'rgb(128, 128, 128)');
   editMap();
 }
@@ -305,5 +315,6 @@ function editMap() {
         }
       });
     }
+
   }
 }

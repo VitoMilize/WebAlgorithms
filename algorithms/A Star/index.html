@@ -3,14 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>main</title>
     <link rel="stylesheet" href="./styles.css">
-    <title>main</title>
+    <title>A*</title>
 </head>
 
 <body>
     <label for="size">Введите размер лабиринта:</label>
     <input type="number" id="size" name="size">
+
     <button onclick="CreateMaze()">Соvaздать лабиринт</button>
     <button onclick="CreateWall()">Добавить/Удалить стену</button>
     <button onclick="CreateBegin()">Добавить/Удалить начало</button>
@@ -18,6 +18,7 @@
     <div class="matrix" id="maze"> </div>
 
     <button onclick="searchWay()">Найти путь</button>
+
     <script src="./logic.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.3.js"></script>
 </body>

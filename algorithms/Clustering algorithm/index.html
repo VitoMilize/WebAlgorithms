@@ -3,10 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./styles.css">
-    <title>main</title>
+    <script src="./k-means.js"></script>
+    <script src="./density.js"></script>
+    <script src="./hierarchical.js"></script>
+    <script src="./draw.js"></script>
+    <title>Кластеризация</title>
 </head>
 <body>
-    
+    <button class="button" id="start button">Запуск</button>
+    <label for="input clusters amount">Количество центроидов для k-средних</label>
+    <input id="input clusters amount" type="range" min="1" max="10" step="1" value="1">
+    <span id="slider value for cluster amount">1</span>
+    <script>
+        const sliderForClustersAmount = document.getElementById("input clusters amount");
+        const sliderValueForClustersAmount = document.getElementById("slider value for cluster amount");
+
+        sliderValueForClustersAmount.textContent = sliderForClustersAmount.value;
+
+        sliderForClustersAmount.addEventListener("input", function() {
+            sliderValueForClustersAmount.textContent = sliderForClustersAmount.value;
+        });
+    </script>
+    <label for="input threshold">Пороговое расстояние для иерархии</label>
+    <input id="input threshold" type="range" min="10" max="300" step="10" value="10">
+    <span id="slider value for threshold">10</span>
+    <script>
+        const sliderForThreshold = document.getElementById("input threshold");
+        const sliderValueForThreshold = document.getElementById("slider value for threshold");
+
+        sliderValueForThreshold.textContent = sliderForThreshold.value;
+
+        sliderForThreshold.addEventListener("input", function() {
+            sliderValueForThreshold.textContent = sliderForThreshold.value;
+        });
+    </script>
+    <label for="input neighbors radius">Пороговое расстояние для плотности</label>
+    <input id="input neighbors radius" type="range" min="10" max="300" step="10" value="10">
+    <span id="slider value for neighbors radius">10</span>
+    <script>
+        const sliderForClusteringRadius = document.getElementById("input neighbors radius");
+        const sliderValueForTClusteringRadius = document.getElementById("slider value for neighbors radius");
+
+        sliderValueForTClusteringRadius.textContent = sliderForClusteringRadius.value;
+
+        sliderForClusteringRadius.addEventListener("input", function() {
+            sliderValueForTClusteringRadius.textContent = sliderForClusteringRadius.value;
+        });
+    </script>
+    <label for="input neighbors amount">Минмальное количество соседей для плотности</label>
+    <input id="input neighbors amount" type="range" min="1" max="5" step="1" value="1">
+    <span id="slider value for neighbors amount">1</span>
+    <script>
+        const sliderForNeighborsAmount = document.getElementById("input neighbors amount");
+        const sliderValueForNeighborsAmount = document.getElementById("slider value for neighbors amount");
+
+        sliderValueForNeighborsAmount.textContent = sliderForNeighborsAmount.value;
+
+        sliderForNeighborsAmount.addEventListener("input", function() {
+            sliderValueForNeighborsAmount.textContent = sliderForNeighborsAmount.value;
+        });
+    </script>
+    <canvas class="map" id="map"></canvas>
     <script src="./logic.js"></script>
 </body>
 </html>
