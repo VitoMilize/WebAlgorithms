@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="./styles.css">
@@ -8,9 +9,24 @@
     <script src="./individual.js"></script>
     <title>Генетический алгоритм</title>
 </head>
+
 <body>
     <button id="start button">Запуск</button>
     <canvas class="map" id="map"></canvas>
+    <div class="container">
+        <div class="menu">
+            <button class="button" id="buttonStart"></button>
+            <label for="inputPopulationSize">Размер популяции</label>
+            <input type="number" id="inputPopulationSize" placeholder="10">
+            <label for="inputMutationRate">Вероятность мутации(%)</label>
+            <input type="number" id="inputMutationRate" placeholder="10">
+            <label for="inputAmountOfGenerations">Количество поколений</label>
+            <input type="number" id="inputAmountOfGenerations" placeholder="500">
+        </div>
+        <canvas class="map" id="map"></canvas>
+
+    </div>
+
     <script src="./logic.js"></script>
     <div class="menu">
         <button class="button" id="a star algo">А*</button>
@@ -21,4 +37,5 @@
         <button class="button" id="neural algo">Нейронная сеть</button>
     </div>
 </body>
+
 </html>

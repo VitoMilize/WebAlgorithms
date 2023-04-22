@@ -5,4 +5,44 @@
     width: 1250px;
     height: 600px;
     border: 1px solid black;;
+    margin-top: 50px;
+}
+
+.button {
+    width: 400px;
+    height: 30px;
+    font-size: medium;
+    margin-bottom: 20px;
+}
+
+.menu{
+    margin-bottom: 7px;
+    /* display: flex; */
+    /* justify-content: center; */
+    flex-direction: column;
+    align-content:flex-start;
+    align-items: flex-start;
+    text-align: flex-start;
+    margin-left: 40px;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 0px;
+}
+
+.lable{
+    display: inline-block;
+    width: 370px;
+    text-align: left;
+}
+.span
+{
+    display: inline-block;
+    width: 30px;
 }
